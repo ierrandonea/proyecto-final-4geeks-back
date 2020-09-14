@@ -78,5 +78,53 @@ class Content(db.Model):
 class Product_ratings(db.Model):
     __tablename__ = 'product_ratings'
     id = db.Column(db.Integer, primary_key=True)
+    product_id =  db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    p_rating_stars = db.Column(db.Integer, nullable=False)
+    p_rating_comment = db.Column(db.String(280), nullable=False)
+
+    def serialize(self):
+        return{
+            "id": self.id,
+            "product_id": self.product_id,
+            "p_rating_stars": self.p_rating_stars,
+            "p_rating_comment": self.p_rating_comment
+        }
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+class Content_ratings(db.Model):
+    __tablename__ = 'product_ratings'
+    id = db.Column(db.Integer, primary_key=True)
+    content_id =  db.Column(db.Integer, db.ForeignKey('contents.id'), nullable=False)
+    p_rating_likes = db.Column(db.Integer, nullable=False)
+    p_rating_comment = db.Column(db.String(280), nullable=False)
+
+    def serialize(self):
+        return{
+            "id": self.id,
+            "content_id": self.content_id,
+            "p_rating_likes": self.p_rating_likes,
+            "p_rating_comment": self.p_rating_comment
+        }
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()  
 
      
