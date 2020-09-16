@@ -7,29 +7,33 @@ db=SQLAlchemy()
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
-    product_image = db.Column(db.String(120), nullable=False)
-
-    product_name = db.Column(db.String(120), nullable=False)
-    product_price = db.Column(db.String(120), nullable=False)
-
-    product_attributes = db.Column(db.String(255), nullable=False)
-    product_description = db.Column(db.Text, nullable=False)
-
-    product_format = db.Column(db.String(120), nullable=False)
-    product_stock = db.Column(db.Integer, nullable=False)
-    
+    sku = db.Column(db.String(120), nullable=False)
+    price = db.Column(db.String(120), nullable=False)
+    brand = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    category = db.Column(db.String(120), nullable=False)
+    presentation = db.Column(db.String(120), nullable=False)
+    attributes = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(255), nullable=False)
+    thumbnail = db.Column(db.String(255), nullable=False)
+    stock = db.Column(db.Integer, nullable=False)    
     product_ratings = db.relationship("Product_ratings", backref="product")
 
     def serialize(self):
         return{
             "id": self.id,
-            "product_image": self.title,
-            "product_name": self.content,
-            "product_price": self.user_id,
-            "product_attributes": self.product_attributes,
-            "product_description": self.product_description,
-            "product_format": self.product_format,
-            "product_stock": self.product_stock
+            "sku": self.sku
+            "price": self.sku
+            "brand": self.brand
+            "name": self.name
+            "category": self.category,
+            "presentation": self.presentation,
+            "attributes": self.attributes,
+            "description": self.description,
+            "image": self.image,
+            "thumbnail": self.thumbnail,
+            "stock": self.stock
         }
     
     def save(self):
@@ -44,7 +48,7 @@ class Product(db.Model):
         db.session.commit()
 
 class Content(db.Model):
-    __tablename__ = 'contents'
+    __tablename__ = 'content'
     id = db.Column(db.Integer, primary_key=True)
     content_cover = db.Column(db.String(120), nullable=False)
     content_images = db.Column(db.String(255), nullable=False)
@@ -63,7 +67,7 @@ class Content(db.Model):
             "content_name": self.content_name,
             "content_resume": self.content_resume,
             "content_description": self.content_description,
-            "content_ratings": self.content_ratings
+            "content_ratings": self.content_ratings,
         }
     
     def save(self):
@@ -137,7 +141,7 @@ class Content_ratings(db.Model):
 
 
 
-
+    
 
 
 
