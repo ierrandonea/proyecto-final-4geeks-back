@@ -11,10 +11,12 @@ flask-sqlalchemy = "*"
 flask-cors = "*"
 flask-migrate = "*"
 flask-script = "*"
+flask-jwt-extended = "*"
+pymysql = "*"
 
 [requires]
 python_version = "3.8"
- 
+
 [scripts]
 start="python app.py runserver"
 init="python app.py db init"
