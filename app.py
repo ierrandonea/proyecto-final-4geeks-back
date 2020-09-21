@@ -110,10 +110,124 @@ def profile():
 
 # @app.route("/api/users", methods=['GET', 'POST', 'PUT', 'DELETE'])
 
-# @app.route("/api/products", methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route("/api/categories/", methods=['GET', 'POST'])
+@app.route("/api/categories/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def categories(id = None):
+    if request.method == 'GET':
+        if id is not None:
+            category = Category.query.get(id)
+            if category:
+                return jsonify(category.serialize()), 200
+            else:
+                return jsonify({"msg": "Category not found"}), 404
+        else:
+            categories = Category.query.all()
+            categories = list(map(lambda category: category.serialize(), categories))
+            return jsonify(categories), 200
+    if request.method == 'POST':
+        name = request.json.get("name", None)
+        if not name:
+            return jsonify({"msg": "name is missing"}), 400
+        else:
+            category = Category()
+            category.name = name
+            category.save()
+            return jsonify(category.serialize()), 201
+    if request.method == 'PUT':
+        if not id:
+            return jsonify({"msg": "product not found"}), 404
+        else:
+            name = request.json.get("name", None)  
+            if not name:
+                return jsonify({"msg": "name is missing"}), 400
+            else:                                
+                category = Category.query.get(id)
+                category.update()
+                return jsonify(category.serialize()), 200
+    if request.method == 'DELETE':
+        category = Category.query.get(id)
+        if not category:
+            return jsonify({"msg": "Category not found"}), 404
+        category.delete()
+        return jsonify({"msg": "Category succesfully deleted"}), 200
+        
+@app.route("/api/products/", methods=['GET', 'POST'])
+@app.route("/api/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def products(id = None):
+    if request.method == 'GET':
+        if id is not None:
+            products = Product.query.get(id)
+            if products:
+                return jsonify(products.serialize()), 200
+            else:
+                return jsonify({"msg": "product not found"}), 404
+        else:
+            products = Product.query.all()
+            products = list(map(lambda product: product.serialize(), products))
+            return jsonify(products), 200
+    if request.method == 'POST':
+        sku = request.json.get("sku", None)
+        price = request.json.get("price", None)
+        brand = request.json.get("brand", None)
+        name = request.json.get("name", None)
+        presentation = request.json.get("presentation", None)
+        attributes = request.json.get("attributes", None)
+        description = request.json.get("description", None)
+        image = request.json.get("image", None)
+        stock = request.json.get("stock", None)  
+        if not sku and price and brand and name and presentation and attributes and description and stock:
+            return jsonify({"msg": "some fields are missing"}), 400
+        else:
+            product = Product()
+            product.sku = sku
+            product.price = price
+            product.brand = brand
+            product.name = name
+            product.presentation = json.dumps(presentation)
+            product.attributes = json.dumps(attributes)
+            product.description = description
+            product.image = image
+            product.stock = stock
+            product.save()
+            return jsonify(product.serialize()), 201
+    if request.method == 'PUT':
+        if not id:
+            return jsonify({"msg": "product not found"}), 404
+        else:
+            sku = request.json.get("sku", None)
+            price = request.json.get("price", None)
+            brand = request.json.get("brand", None)
+            name = request.json.get("name", None)
+            presentation = request.json.get("presentation", None)
+            attributes = request.json.get("attributes", None)
+            description = request.json.get("description", None)
+            image = request.json.get("image", None)
+            stock = request.json.get("stock", None)  
+            # if not sku or price or brand or name or presentation or attributes or description or stock:
+            if not sku:
+                return jsonify({"msg": "some fields are missing"}), 400
+            else:                                
+                product = Product.query.get(id)
+                product.sku = sku
+                product.price = price
+                product.brand = brand
+                product.name = name
+                product.presentation = json.dumps(presentation)
+                product.attributes = json.dumps(attributes)
+                product.description = description
+                product.image = image
+                product.stock = stock
+                product.update()
+                return jsonify(product.serialize()), 200
+    if request.method == 'DELETE':
+        product = Product.query.get(id)
+        if not product:
+            return jsonify({"msg": "Product not found"}), 404
+        product.delete()
+        return jsonify({"msg": "Product succesfully deleted"}), 200
 # @app.route("/api/content", methods=['GET', 'POST', 'PUT', 'DELETE'])
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
-
 if __name__ == "__main__":
+
     manager.run()
  

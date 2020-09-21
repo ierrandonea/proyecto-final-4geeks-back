@@ -34,48 +34,61 @@ class Users(db.Model):
         db.session.delete(self)
         db.session.commit() 
 
-# class Product(db.Model):
-#     __tablename__ = 'products'
-#     id = db.Column(db.Integer, primary_key=True)
-#     sku = db.Column(db.String(120), nullable=False)
-#     price = db.Column(db.String(120), nullable=False)
-#     brand = db.Column(db.String(120), nullable=False)
-#     name = db.Column(db.String(120), nullable=False)
-#     category = db.Column(db.String(120), nullable=False)
-#     presentation = db.Column(db.String(120), nullable=False)
-#     attributes = db.Column(db.String(120), nullable=False)
-#     description = db.Column(db.Text, nullable=False)
-#     image = db.Column(db.String(255), nullable=False)
-#     thumbnail = db.Column(db.String(255), nullable=False)
-#     stock = db.Column(db.Integer, nullable=False)    
-#     product_ratings = db.relationship("product_ratings", backref="product")
+class Product(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.Integer, primary_key=True)
+    sku = db.Column(db.String(120), nullable=False)
+    price = db.Column(db.String(120), nullable=False)
+    brand = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    presentation = db.Column(db.String(500), nullable=False)
+    attributes = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    image = db.Column(
+        db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
+    stock = db.Column(db.Integer, nullable=False)
+    # product_ratings = db.relationship("Product_Ratings", backref="product")
+    product_categories = db.relationship("Product_category", backref="product")
 
-#     def serialize(self):
-#         return{
-#             "id": self.id,
-#             "sku": self.sku,
-#             "price": self.price,
-#             "brand": self.brand,
-#             "name": self.name,
-#             "category": self.category,
-#             "presentation": self.presentation,
-#             "attributes": self.attributes,
-#             "description": self.description,
-#             "image": self.image,
-#             "thumbnail": self.thumbnail,
-#             "stock": self.stock
-#         }
+    def serialize(self):        
+        return{
+            "id": self.id,
+            "sku": self.sku,
+            "price": self.price,
+            "brand": self.brand,
+            "name": self.name,
+            "presentation": json.loads(self.presentation),
+            "attributes": json.loads(self.attributes),
+            "description": self.description,
+            "image": self.image,
+            "stock": self.stock
+        }
     
-#     def save(self):
-#         db.session.add(self)
-#         db.session.commit()
+    def serialize_with_categories(self):
+        categories = list(map(lambda categories: categories.serialize(), self.categories))
+        return{
+            "id": self.id,
+            "sku": self.sku,
+            "price": self.price,
+            "brand": self.brand,
+            "name": self.name,
+            "categories": categories,
+            "presentation": json.loads(self.presentation),
+            "attributes": json.loads(self.attributes),
+            "description": self.description,
+            "image": self.image,
+            "stock": self.stock
+        }
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
-#     def update(self):
-#         db.session.commit()
+    def update(self):
+        db.session.commit()
 
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 # class Content(db.Model):
 #     __tablename__ = 'contents'
@@ -269,11 +282,12 @@ class Users(db.Model):
 #         db.session.delete(self)
 #         db.session.commit()  
 
-# class Product_Category(db.Model):
-#     __tablename__ = 'product_categories'
-#     id = db.Column(db.Integer, primary_key=True)
-#     # product_id =  db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-#     # category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+class Product_category(db.Model):
+    __tablename__: 'p_categories'
+    product_id = db.Column( db.Integer, db.ForeignKey('products.id'), primary_key=True)
+    category_id = db.Column( db.Integer, db.ForeignKey('categories.id'), primary_key=True)
+    p_rel = db.relationship("Product", backref="p_categories")
+    cat_rel = db.relationship("Category", backref="cat_products")
 
 # class Event_Category(db.Model):
 #     __tablename__ = 'event_categories'
@@ -281,10 +295,27 @@ class Users(db.Model):
 #     # event_id =  db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
 #     # category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
-# class Category(db.Model):
-#     __tablename__ = 'categories'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(120), nullable=False)
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    products = db.relationship("Product_category", backref="categories")
+
+    def serialize(self):
+        return{
+            "name": self.name,
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 # class Event(db.Model):
 #     __tablename__ = 'events'
@@ -322,10 +353,6 @@ class Users(db.Model):
 #     def delete(self):
 #         db.session.delete(self)
 #         db.session.commit()
- 
-
-
-
 
 
 
