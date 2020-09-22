@@ -1,11 +1,14 @@
-import json, datetime
-from flask import Flask, request, jsonify, render_template
+import json, os, datetime
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-from models import db, Users
+
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+
+from models import db, User, Product, Category, ProductCategory
 from config import Development
 
 app = Flask(__name__)
@@ -34,7 +37,7 @@ def login():
     if not password:
         return jsonify({"msg": {"password": "Password is required"}}), 400
 
-    user = Users.query.filter_by(email = email).first()
+    user = User.query.filter_by(email = email).first()
 
     if not user:
         return jsonify({"msg": {"not_user": "Email/password is incorrect"}}), 401
@@ -77,13 +80,13 @@ def register():
     if not address:
         return jsonify({"msg": "Address is required"}), 400
     
-    user = Users.query.filter_by(email = email).first()
+    user = User.query.filter_by(email = email).first()
     print(user)
 
     if user:
         return jsonify({"msg": "User already exists"}), 400
 
-    user = Users()
+    user = User()
     user.name = name
     user.last_name = last_name
     user.password = generate_password_hash(password)
@@ -105,7 +108,7 @@ def register():
 def profile():
 
     id = get_jwt_identity()
-    user = Users.query.get(id)
+    user = User.query.get(id)
     return jsonify(user.serialize()), 200 
 
 # @app.route("/api/users", methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -158,44 +161,44 @@ def products(id = None):
         if id is not None:
             products = Product.query.get(id)
             if products:
-                return jsonify(products.serialize()), 200
+                return jsonify(products.serialize_w_categories()), 200
             else:
                 return jsonify({"msg": "product not found"}), 404
         else:
             products = Product.query.all()
-            products = list(map(lambda product: product.serialize(), products))
+            products = list(map(lambda product: product.serialize_w_categories(), products))
             return jsonify(products), 200
     if request.method == 'POST':
         sku = request.json.get("sku", None)
-        price = request.json.get("price", None)
         brand = request.json.get("brand", None)
         name = request.json.get("name", None)
         presentation = request.json.get("presentation", None)
         attributes = request.json.get("attributes", None)
         description = request.json.get("description", None)
         image = request.json.get("image", None)
-        stock = request.json.get("stock", None)  
-        if not sku and price and brand and name and presentation and attributes and description and stock:
+        categories = request.json.get("categories", None)      
+        if not sku and price and brand and name and presentation and attributes and description:
             return jsonify({"msg": "some fields are missing"}), 400
         else:
             product = Product()
             product.sku = sku
-            product.price = price
             product.brand = brand
             product.name = name
             product.presentation = json.dumps(presentation)
             product.attributes = json.dumps(attributes)
             product.description = description
             product.image = image
-            product.stock = stock
+            for category in categories:
+                p_cat = Category.query.get(category)
+                p_cat.category_id = category
+                product.categories.append(p_cat)
             product.save()
-            return jsonify(product.serialize()), 201
+            return jsonify(product.serialize_w_categories()), 201
     if request.method == 'PUT':
         if not id:
             return jsonify({"msg": "product not found"}), 404
         else:
             sku = request.json.get("sku", None)
-            price = request.json.get("price", None)
             brand = request.json.get("brand", None)
             name = request.json.get("name", None)
             presentation = request.json.get("presentation", None)
@@ -209,7 +212,6 @@ def products(id = None):
             else:                                
                 product = Product.query.get(id)
                 product.sku = sku
-                product.price = price
                 product.brand = brand
                 product.name = name
                 product.presentation = json.dumps(presentation)
@@ -230,4 +232,214 @@ def products(id = None):
 if __name__ == "__main__":
 
     manager.run()
- 
+
+
+# {
+# 	"attributes": {
+# 		"acidity": "7",
+# 		"origin": "Colombia",
+# 		"roasting": "65 AGS",
+# 		"species": "Robusta",
+# 		"type": "Molido"
+# 	},
+# 	"brand": "Finca Test",
+# 	"description": "Lorem ipsum dolor sit amen.",
+# 	"image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+# 	"name": "Debugging coffee",
+# 	"presentation": [
+# 		{
+# 			"format1": "150gr",
+# 			"stock": 16,
+# 			"price": "5600"
+# 		},
+# 		{
+# 			"format2": "260gr",
+# 			"stock": 14,
+# 			"price": "9600"
+# 		},
+# 		{
+# 			"format3": "1kg",
+# 			"stock": 9,
+# 			"price": "15000"
+# 		}
+# 	],
+# 	"sku": "4gB-FP-4Geeks-a11",
+# 	"categories": [1,2]
+# }
+
+# [
+#   {
+#     "attributes": {
+#       "acidity": "6",
+#       "origin": "Colombia",
+#       "roasting": "95 AGS",
+#       "species": "Arabica",
+#       "type": "Molido"
+#     },
+#     "brand": "4Geeks Coffee",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 1,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Console.log(Coffee)",
+#     "presentation": [
+#       {
+#         "format": "100gr",
+#         "stock": 22
+#       },
+#       {
+#         "format": "210gr",
+#         "stock": 10
+#       },
+#       {
+#         "format": "370gr",
+#         "stock": 19
+#       }
+#     ],
+#     "sku": "4gB-FP-4Geeks-ftVII"
+#   },
+#   {
+#     "attributes": {
+#       "acidity": "6",
+#       "origin": "Perú",
+#       "roasting": "75 AGS",
+#       "species": "Arabica",
+#       "type": "Grano"
+#     },
+#     "brand": "Los Cafetales de Satán",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 2,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Café Cecilia",
+#     "presentation": [
+#       {
+#         "format": "120gr",
+#         "stock": 14
+#       },
+#       {
+#         "format": "250gr",
+#         "stock": 11
+#       },
+#       {
+#         "format": "480gr",
+#         "stock": 12
+#       }
+#     ],
+#     "sku": "4gB-FP-Ca2Lo3Ii4-ftVII"
+#   },
+#   {
+#     "attributes": {
+#       "acidity": "9",
+#       "origin": "Venelueza",
+#       "roasting": "75 AGS",
+#       "species": "Arabica",
+#       "type": "Grano"
+#     },
+#     "brand": "Los Cafetales de Satán",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 3,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Café de Lorenzo",
+#     "presentation": [
+#       {
+#         "format": "150gr",
+#         "stock": 34
+#       },
+#       {
+#         "format": "250gr",
+#         "stock": 18
+#       },
+#       {
+#         "format": "500gr",
+#         "stock": 7
+#       }
+#     ],
+#     "sku": "4gB-FP-Ca1Lo2Ii3-ft7"
+#   },
+#   {
+#     "attributes": {
+#       "acidity": "6",
+#       "origin": "Chile",
+#       "roasting": "55 AGS",
+#       "species": "Arabica",
+#       "type": "Cápsulas"
+#     },
+#     "brand": "Los Cafetales de Satán",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 4,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Iñaki Café",
+#     "presentation": [
+#       {
+#         "format": "12u",
+#         "stock": 12
+#       },
+#       {
+#         "format": "21u",
+#         "stock": 8
+#       },
+#       {
+#         "format": "30u",
+#         "stock": 21
+#       }
+#     ],
+#     "sku": "4gB-FP-Ca7Lo8Ii9-ft14"
+#   },
+#   {
+#     "attributes": {
+#       "acidity": "5",
+#       "origin": "Chile-Venezuela",
+#       "roasting": "65 AGS",
+#       "species": "Arabica",
+#       "type": "Cápsulas"
+#     },
+#     "brand": "4Geeks Coffee",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 5,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Monroy Café",
+#     "presentation": [
+#       {
+#         "format": "12u",
+#         "stock": 10
+#       },
+#       {
+#         "format": "25u",
+#         "stock": 18
+#       },
+#       {
+#         "format": "35u",
+#         "stock": 12
+#       }
+#     ],
+#     "sku": "4gB-FP-4Geeks-ft21"
+#   },
+#   {
+#     "attributes": {
+#       "acidity": "7",
+#       "origin": "Chile-Venezuela",
+#       "roasting": "85 AGS",
+#       "species": "Arabica",
+#       "type": "Grano"
+#     },
+#     "brand": "4Geeks Coffee",
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "id": 6,
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Café LJGoku",
+#     "presentation": [
+#       {
+#         "format1": "120gr",
+#         "stock": 15
+#       },
+#       {
+#         "format2": "240gr",
+#         "stock": 18
+#       },
+#       {
+#         "format3": "480gr",
+#         "stock": 7
+#       }
+#     ],
+#     "sku": "4gB-FP-4Geeks-a11"
+#   }
+# ]

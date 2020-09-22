@@ -13,6 +13,7 @@ flask-migrate = "*"
 flask-script = "*"
 flask-jwt-extended = "*"
 pymysql = "*"
+cryptography = "*"
 
 [requires]
 python_version = "3.8"
