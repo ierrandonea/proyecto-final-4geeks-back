@@ -122,42 +122,42 @@ class Product(db.Model):
 #     "categories": [1,3]
 #   }
 
-# class Content(db.Model):
-#     __tablename__ = 'contents'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(120), nullable=False)
-#     cover = db.Column(db.String(255), nullable=False)
-#     images = db.Column(db.String(255), nullable=False)
-#     resume = db.Column(db.String(280), nullable=False)
-#     body = db.Column(db.Text, nullable=False)
-#     # please organize large text areas as:
-#     # {
-#         # "paragraph_1": "lorem ipsum...",
-#         # "paragraph_2": "lorem ipsum...",
-#         # ...
-#     # }   
-#     # content_ratings = db.relationship("content_ratings", backref="contents")
+ class Content(db.Model):
+     __tablename__ = 'contents'
+     id = db.Column(db.Integer, primary_key=True)
+     name = db.Column(db.String(120), nullable=False)
+     cover = db.Column(db.String(255), nullable=False)
+     images = db.Column(db.String(255), nullable=False)
+     resume = db.Column(db.String(280), nullable=False)
+     body = db.Column(db.Text, nullable=False)
+     # please organize large text areas as:
+     # {
+         # "paragraph_1": "lorem ipsum...",
+         # "paragraph_2": "lorem ipsum...",
+         # ...
+     # }   
+     # content_ratings = db.relationship("content_ratings", backref="contents")
 
-#     def serialize(self):
-#         return{
-#             "id": self.id,
-#             "name": self.name,
-#             "cover": self.cover,
-#             "images": self.images,
-#             "resume": self.resume,
-#             "body": self.body
-#         }
+     def serialize(self):
+         return{
+             "id": self.id,
+             "name": self.name,
+             "cover": self.cover,
+             "images": self.images,
+             "resume": self.resume,
+             "body": self.body
+         }
     
-#     def save(self):
-#         db.session.add(self)
-#         db.session.commit()
+     def save(self):
+         db.session.add(self)
+         db.session.commit()
 
-#     def update(self):
-#         db.session.commit()
+    def update(self):
+         db.session.commit()
 
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def delete(self):
+         db.session.delete(self)
+         db.session.commit()
 
 class ProductRating(db.Model):
     __tablename__ = 'product_ratings'

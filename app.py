@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-from models import db, User, Product, Category, ProductCategory
+from models import db, User, Product, Category, ProductCategory, Content
 from config import Development
 
 app = Flask(__name__)
@@ -228,6 +228,65 @@ def products(id = None):
         product.delete()
         return jsonify({"msg": "Product succesfully deleted"}), 200
 # @app.route("/api/content", methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route("/api/content/", methods=['GET', 'POST'])
+@app.route("/api/content/<id>", methods=['GET', 'PUT', 'DELETE'])
+def content (id=None):
+    if request.method == 'GET':
+        if id is not None:
+            content = Content.query.get(id)
+            if content: 
+                return jsonify(content.serialize()), 200
+            else:
+                return jsonify({"msg": "content not found"}), 404
+        else:
+            content = Content.query.all()
+            content = list(map(lambda content: content.serialize(), content))
+            return jsonify(products), 200
+    if request.method == 'POST':
+        name = request.json.get("name", None)
+        cover = request.json.get("cover", None)
+        images = request.json.get("images", None)
+        resume = request.json.get("resume", None)
+        body = request.json.get("body", None)
+        if not name and cover and images and resume and body:
+            return jsonify({"msg":"some contents are missing"}), 400
+        else:
+            content = Content()
+            content.name = name
+            content.cover = cover
+            content.images = images
+            content.resume = resume
+            content.body = body
+            content.save()
+            return jsonify(content.serialize()), 201
+    if request.method == 'PUT':
+        content = Content.query.get(id)
+        if not content:
+            return jsonify({"msg":"content not found"}), 404
+        else:
+            name = request.json.get("name", None)
+            cover = request.json.get("cover", None)
+            images = request.json.get("images", None)
+            resume = request.json.get("resume", None)
+            body = request.json.get("body", None)
+        if not name and cover and images and resume and body:
+            return jsonify({"msg":"some contents are missing"}), 400
+        else:
+            content = Content()
+            content.name = name
+            content.cover = cover
+            content.images = images
+            content.resume = resume
+            content.body = body
+            content.update()
+            return jsonify(content.serialize()), 200 
+    if request.method == 'DELETE':
+        content = Content.query.get(id)
+        if not content:
+            return jsonify({"msg": "Content not found"}), 404
+        product.delete()
+        return jsonify({"msg": "Content succesfully deleted"}), 200
+
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
 
