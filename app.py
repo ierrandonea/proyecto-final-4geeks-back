@@ -153,12 +153,31 @@ def categories(id = None):
             return jsonify({"msg": "Category not found"}), 404
         category.delete()
         return jsonify({"msg": "Category succesfully deleted"}), 200
-        
+
+
+@app.route("/api/products/order/<sorting>", methods=['GET'])        
 @app.route("/api/products/", methods=['GET', 'POST'])
 @app.route("/api/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def products(id = None):
+def products(id = None, sorting = None):
     if request.method == 'GET':
-        if id is not None:
+        if sorting is not None:
+            if sorting == 'priceup':
+                products = Product.query.order_by(Product.price.asc()).all()
+                products = list(map(lambda product: product.serialize_w_categories(), products))
+                return jsonify(products), 200
+            elif sorting == 'pricedown':
+                products = Product.query.order_by(Product.price.desc()).all()
+                products = list(map(lambda product: product.serialize_w_categories(), products))
+                return jsonify(products), 200
+            elif sorting == 'brandup':
+                products = Product.query.order_by(Product.brand.asc()).all()
+                products = list(map(lambda product: product.serialize_w_categories(), products))
+                return jsonify(products), 200
+            elif sorting == 'branddown':
+                products = Product.query.order_by(Product.brand.desc()).all()
+                products = list(map(lambda product: product.serialize_w_categories(), products))
+                return jsonify(products), 200
+        elif id is not None:
             products = Product.query.get(id)
             if products:
                 return jsonify(products.serialize_w_categories()), 200
@@ -173,7 +192,13 @@ def products(id = None):
         brand = request.json.get("brand", None)
         name = request.json.get("name", None)
         presentation = request.json.get("presentation", None)
-        attributes = request.json.get("attributes", None)
+        price = request.json.get("price", None)
+        stock = request.json.get("stock", None)
+        origin = request.json.get("origin", None)
+        species = request.json.get("species", None)
+        ground = request.json.get("ground", None)
+        acidity = request.json.get("acidity", None)
+        roasting = request.json.get("roasting", None)
         description = request.json.get("description", None)
         image = request.json.get("image", None)
         categories = request.json.get("categories", None)      
@@ -184,8 +209,14 @@ def products(id = None):
             product.sku = sku
             product.brand = brand
             product.name = name
-            product.presentation = json.dumps(presentation)
-            product.attributes = json.dumps(attributes)
+            product.price = price
+            product.stock = stock
+            product.origin = origin
+            product.species = species
+            product.ground = ground
+            product.acidity = acidity
+            product.roasting = roasting
+            product.presentation = presentation
             product.description = description
             product.image = image
             for category in categories:
@@ -202,10 +233,15 @@ def products(id = None):
             brand = request.json.get("brand", None)
             name = request.json.get("name", None)
             presentation = request.json.get("presentation", None)
-            attributes = request.json.get("attributes", None)
+            price = request.json.get("price", None)
+            stock = request.json.get("stock", None)
+            origin = request.json.get("origin", None)
+            species = request.json.get("species", None)
+            ground = request.json.get("ground", None)
+            acidity = request.json.get("acidity", None)
+            roasting = request.json.get("roasting", None)
             description = request.json.get("description", None)
-            image = request.json.get("image", None)
-            stock = request.json.get("stock", None)  
+            image = request.json.get("image", None) 
             # if not sku or price or brand or name or presentation or attributes or description or stock:
             if not sku:
                 return jsonify({"msg": "some fields are missing"}), 400
@@ -214,11 +250,16 @@ def products(id = None):
                 product.sku = sku
                 product.brand = brand
                 product.name = name
-                product.presentation = json.dumps(presentation)
-                product.attributes = json.dumps(attributes)
+                product.price = price
+                product.stock = stock
+                product.origin = origin
+                product.species = species
+                product.ground = ground
+                product.acidity = acidity
+                product.roasting = roasting
+                product.presentation = presentation
                 product.description = description
                 product.image = image
-                product.stock = stock
                 product.update()
                 return jsonify(product.serialize()), 200
     if request.method == 'DELETE':
@@ -230,216 +271,4 @@ def products(id = None):
 # @app.route("/api/content", methods=['GET', 'POST', 'PUT', 'DELETE'])
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
-
     manager.run()
-
-
-# {
-# 	"attributes": {
-# 		"acidity": "7",
-# 		"origin": "Colombia",
-# 		"roasting": "65 AGS",
-# 		"species": "Robusta",
-# 		"type": "Molido"
-# 	},
-# 	"brand": "Finca Test",
-# 	"description": "Lorem ipsum dolor sit amen.",
-# 	"image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-# 	"name": "Debugging coffee",
-# 	"presentation": [
-# 		{
-# 			"format1": "150gr",
-# 			"stock": 16,
-# 			"price": "5600"
-# 		},
-# 		{
-# 			"format2": "260gr",
-# 			"stock": 14,
-# 			"price": "9600"
-# 		},
-# 		{
-# 			"format3": "1kg",
-# 			"stock": 9,
-# 			"price": "15000"
-# 		}
-# 	],
-# 	"sku": "4gB-FP-4Geeks-a11",
-# 	"categories": [1,2]
-# }
-
-# [
-#   {
-#     "attributes": {
-#       "acidity": "6",
-#       "origin": "Colombia",
-#       "roasting": "95 AGS",
-#       "species": "Arabica",
-#       "type": "Molido"
-#     },
-#     "brand": "4Geeks Coffee",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 1,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Console.log(Coffee)",
-#     "presentation": [
-#       {
-#         "format": "100gr",
-#         "stock": 22
-#       },
-#       {
-#         "format": "210gr",
-#         "stock": 10
-#       },
-#       {
-#         "format": "370gr",
-#         "stock": 19
-#       }
-#     ],
-#     "sku": "4gB-FP-4Geeks-ftVII"
-#   },
-#   {
-#     "attributes": {
-#       "acidity": "6",
-#       "origin": "Perú",
-#       "roasting": "75 AGS",
-#       "species": "Arabica",
-#       "type": "Grano"
-#     },
-#     "brand": "Los Cafetales de Satán",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 2,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Café Cecilia",
-#     "presentation": [
-#       {
-#         "format": "120gr",
-#         "stock": 14
-#       },
-#       {
-#         "format": "250gr",
-#         "stock": 11
-#       },
-#       {
-#         "format": "480gr",
-#         "stock": 12
-#       }
-#     ],
-#     "sku": "4gB-FP-Ca2Lo3Ii4-ftVII"
-#   },
-#   {
-#     "attributes": {
-#       "acidity": "9",
-#       "origin": "Venelueza",
-#       "roasting": "75 AGS",
-#       "species": "Arabica",
-#       "type": "Grano"
-#     },
-#     "brand": "Los Cafetales de Satán",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 3,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Café de Lorenzo",
-#     "presentation": [
-#       {
-#         "format": "150gr",
-#         "stock": 34
-#       },
-#       {
-#         "format": "250gr",
-#         "stock": 18
-#       },
-#       {
-#         "format": "500gr",
-#         "stock": 7
-#       }
-#     ],
-#     "sku": "4gB-FP-Ca1Lo2Ii3-ft7"
-#   },
-#   {
-#     "attributes": {
-#       "acidity": "6",
-#       "origin": "Chile",
-#       "roasting": "55 AGS",
-#       "species": "Arabica",
-#       "type": "Cápsulas"
-#     },
-#     "brand": "Los Cafetales de Satán",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 4,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Iñaki Café",
-#     "presentation": [
-#       {
-#         "format": "12u",
-#         "stock": 12
-#       },
-#       {
-#         "format": "21u",
-#         "stock": 8
-#       },
-#       {
-#         "format": "30u",
-#         "stock": 21
-#       }
-#     ],
-#     "sku": "4gB-FP-Ca7Lo8Ii9-ft14"
-#   },
-#   {
-#     "attributes": {
-#       "acidity": "5",
-#       "origin": "Chile-Venezuela",
-#       "roasting": "65 AGS",
-#       "species": "Arabica",
-#       "type": "Cápsulas"
-#     },
-#     "brand": "4Geeks Coffee",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 5,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Monroy Café",
-#     "presentation": [
-#       {
-#         "format": "12u",
-#         "stock": 10
-#       },
-#       {
-#         "format": "25u",
-#         "stock": 18
-#       },
-#       {
-#         "format": "35u",
-#         "stock": 12
-#       }
-#     ],
-#     "sku": "4gB-FP-4Geeks-ft21"
-#   },
-#   {
-#     "attributes": {
-#       "acidity": "7",
-#       "origin": "Chile-Venezuela",
-#       "roasting": "85 AGS",
-#       "species": "Arabica",
-#       "type": "Grano"
-#     },
-#     "brand": "4Geeks Coffee",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "id": 6,
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Café LJGoku",
-#     "presentation": [
-#       {
-#         "format1": "120gr",
-#         "stock": 15
-#       },
-#       {
-#         "format2": "240gr",
-#         "stock": 18
-#       },
-#       {
-#         "format3": "480gr",
-#         "stock": 7
-#       }
-#     ],
-#     "sku": "4gB-FP-4Geeks-a11"
-#   }
-# ]
