@@ -1,8 +1,9 @@
 import json
 from flask_sqlalchemy import SQLAlchemy
-db=SQLAlchemy()
+db = SQLAlchemy()
 
 # to consult database schema: https://dbdesigner.page.link/xvnBfzE4JMMCnLmx5
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -10,7 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
-    password = db.Column(db.String(120), nullable=False)       
+    password = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
     user_ratings = db.relationship("ProductRating", backref="user", lazy=True)
@@ -21,11 +22,11 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "name": self.name,
-            "last_name": self.last_name,                                    
+            "last_name": self.last_name,
             "phone": self.phone,
             "address": self.address
         }
-    
+
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -35,7 +36,8 @@ class User(db.Model):
 
     def delete(self):
         db.session.delete(self)
-        db.session.commit() 
+        db.session.commit()
+
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -52,12 +54,14 @@ class Product(db.Model):
     acidity = db.Column(db.Integer, nullable=False)
     roasting = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
-    image = db.Column(db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
+    image = db.Column(
+        db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
     ratings = db.relationship("ProductRating", backref="product", lazy=True)
-    categories = db.relationship('Category', secondary="product_categories", lazy=True)
+    categories = db.relationship(
+        'Category', secondary="product_categories", lazy=True)
     orders = db.relationship('OrderDetail', backref="product", lazy=True)
 
-    def serialize(self):        
+    def serialize(self):
         return{
             "id": self.id,
             "sku": self.sku,
@@ -74,9 +78,10 @@ class Product(db.Model):
             "description": self.description,
             "image": self.image
         }
-    
+
     def serialize_w_categories(self):
-        categories = list(map(lambda category: category.serialize(), self.categories))        
+        categories = list(
+            map(lambda category: category.serialize(), self.categories))
         return{
             "id": self.id,
             "sku": self.sku,
@@ -125,42 +130,42 @@ class Product(db.Model):
 # 	]
 # }
 
- class Content(db.Model):
-     __tablename__ = 'contents'
-     id = db.Column(db.Integer, primary_key=True)
-     name = db.Column(db.String(120), nullable=False)
-     cover = db.Column(db.String(255), nullable=False)
-     images = db.Column(db.String(255), nullable=False)
-     resume = db.Column(db.String(280), nullable=False)
-     body = db.Column(db.Text, nullable=False)
-     # please organize large text areas as:
-     # {
-         # "paragraph_1": "lorem ipsum...",
-         # "paragraph_2": "lorem ipsum...",
-         # ...
-     # }   
-     # content_ratings = db.relationship("content_ratings", backref="contents")
+class Content(db.Model):
+    __tablename__ = 'contents'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    cover = db.Column(db.String(255), nullable=False)
+    images = db.Column(db.String(255), nullable=False)
+    resume = db.Column(db.String(280), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    # please organize large text areas as:
+    # {
+        # "paragraph_1": "lorem ipsum...",
+        # "paragraph_2": "lorem ipsum...",
+        # ...
+    # }
+    # content_ratings = db.relationship("content_ratings", backref="contents")
 
-     def serialize(self):
-         return{
-             "id": self.id,
-             "name": self.name,
-             "cover": self.cover,
-             "images": self.images,
-             "resume": self.resume,
-             "body": self.body
-         }
-    
-     def save(self):
-         db.session.add(self)
-         db.session.commit()
+    def serialize(self):
+        return{
+            "id": self.id,
+            "name": self.name,
+            "cover": self.cover,
+            "images": self.images,
+            "resume": self.resume,
+            "body": self.body
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
     def update(self):
-         db.session.commit()
+        db.session.commit()
 
     def delete(self):
-         db.session.delete(self)
-         db.session.commit()
+        db.session.delete(self)
+        db.session.commit()
 
 class ProductRating(db.Model):
     __tablename__ = 'product_ratings'
