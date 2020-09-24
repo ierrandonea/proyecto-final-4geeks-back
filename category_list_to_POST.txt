@@ -1,0 +1,14 @@
+!!! before posting a product, you must add a category ***
+
+{
+	"name": "Orgánico"
+},
+{
+	"name": "Single Origin"
+},
+{
+	"name": "Multi Origin"
+},
+{
+	"name": "Premiado"
+}

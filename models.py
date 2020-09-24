@@ -43,8 +43,14 @@ class Product(db.Model):
     sku = db.Column(db.String(120), nullable=False)
     brand = db.Column(db.String(120), nullable=False)
     name = db.Column(db.String(120), nullable=False)
-    presentation = db.Column(db.String(500), nullable=False)
-    attributes = db.Column(db.String(500), nullable=False)
+    presentation = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    stock = db.Column(db.Integer, nullable=False)
+    origin = db.Column(db.String(100), nullable=False)
+    species = db.Column(db.String(100), nullable=False)
+    ground = db.Column(db.String(100), nullable=False)
+    acidity = db.Column(db.Integer, nullable=False)
+    roasting = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
     image = db.Column(db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
     ratings = db.relationship("ProductRating", backref="product", lazy=True)
@@ -57,8 +63,14 @@ class Product(db.Model):
             "sku": self.sku,
             "brand": self.brand,
             "name": self.name,
-            "presentation": json.loads(self.presentation),
-            "attributes": json.loads(self.attributes),
+            "presentation": self.presentation,
+            "price": self.price,
+            "stock": self.stock,
+            "origin": self.origin,
+            "species": self.species,
+            "ground": self.ground,
+            "acidity": self.acidity,
+            "roasting": self.roasting,
             "description": self.description,
             "image": self.image
         }
@@ -71,8 +83,14 @@ class Product(db.Model):
             "brand": self.brand,
             "name": self.name,
             "categories": categories,
-            "presentation": json.loads(self.presentation),
-            "attributes": json.loads(self.attributes),
+            "presentation": self.presentation,
+            "price": self.price,
+            "stock": self.stock,
+            "origin": self.origin,
+            "species": self.species,
+            "ground": self.ground,
+            "acidity": self.acidity,
+            "roasting": self.roasting,
             "description": self.description,
             "image": self.image
         }
@@ -90,37 +108,22 @@ class Product(db.Model):
 
 # please register products sending info this way:
 # {
-#     "attributes": {
-#       "acidity": "6",
-#       "origin": "Colombia",
-#       "roasting": "95 AGS",
-#       "species": "Arabica",
-#       "type": "Molido"
-#     },
-#     "brand": "4Geeks Coffee",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Console.log(Coffee)",
-#     "presentation": [
-#       {
-#         "format": "100gr",
-#         "stock": 22,
-#         "price": "3590"
-#       },
-#       {
-#         "format": "210gr",
-#         "stock": 10,
-#         "price": "6500"
-#       },
-#       {
-#         "format": "370gr",
-#         "stock": 19,
-#         "price": "12000"
-#       }
-#     ],
-#     "sku": "4gB-FP-4Geeks-ftVII",
-#     "categories": [1,3]
-#   }
+# 	"sku": "4gB-FP-4Geeks-ft21",
+# 	"brand": "4Geeks Coffee",
+# 	"name": "Monroy Café",
+# 	"presentation": "12u",
+# 	"price": 6900,
+# 	"stock": 10,
+# 	"origin": "Chile-Venezuela",
+# 	"species": "Arabica",
+# 	"ground": "Cápsulas",
+# 	"acidity": 5,
+# 	"roasting": 65,
+# 	"description": "Lorem ipsum dolor sit amen.",
+# 	"categories": [
+# 		1
+# 	]
+# }
 
  class Content(db.Model):
      __tablename__ = 'contents'

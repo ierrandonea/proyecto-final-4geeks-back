@@ -1,0 +1,91 @@
+!!! before posting a product, you must add a category ***
+
+{
+	"sku": "4gB-FP-4Geeks-ft21",
+	"brand": "4Geeks Coffee",
+	"name": "Monroy Café",
+	"presentation": "12u",
+	"price": 6900,
+	"stock": 10,
+	"origin": "Chile-Venezuela",
+	"species": "Arabica",
+	"ground": "Cápsulas",
+	"acidity": 5,
+	"roasting": 65,
+	"description": "Lorem ipsum dolor sit amen.",
+	"categories": [
+		1
+	]
+},
+{
+	"sku": "4gB-FP-4Geeks-a11",
+	"brand": "Finca Test",
+	"name": "Debugging Coffee",
+	"presentation": "150gr",
+	"price": 6950,
+	"stock": 16,
+	"origin": "Colombia",
+	"species": "Robusta",
+	"ground": "Molido",
+	"acidity": 7,
+	"roasting": 65,
+	"description": "Lorem ipsum dolor sit amen.",
+	"categories": [
+		1,
+		3
+	]
+},
+{
+	"sku": "4gB-FP-4Geeks-ftVII",
+	"brand": "4Geeks Coffee",
+	"name": "Console.log(Coffee)",
+	"presentation": "100gr",
+	"price": 4390,
+	"stock": 22,
+	"origin": "Colombia",
+	"species": "Arabica",
+	"ground": "Molido",
+	"acidity": 6,
+	"roasting": 95,
+	"description": "Lorem ipsum dolor sit amen.",
+	"categories": [
+		2,
+		4
+	]
+},
+{
+	"sku": "4gB-FP-4Geeks-ftVII",
+	"brand": "Los Cafetales de Satán",
+	"name": "Café Cecilia",
+	"presentation": "100gr",
+	"price": 4390,
+	"stock": 22,
+	"origin": "Perú",
+	"species": "Arabica",
+	"ground": "Grano",
+	"acidity": 8,
+	"roasting": 55,
+	"description": "Lorem ipsum dolor sit amen.",
+	"categories": [
+		2
+	]
+},
+{
+	"sku": "4gB-FP-Ca7Lo8Ii9-ft14",
+	"brand": "Los Cafetales de Satán",
+	"name": "Iñaki Kohi",
+	"presentation": "15u",
+	"price": 9990,
+	"stock": 24,
+	"origin": "Chile",
+	"species": "Arabica",
+	"ground": "Cápsulas",
+	"acidity": 9,
+	"roasting": 55,
+	"description": "Lorem ipsum dolor sit amen.",
+	"categories": [
+		1,
+		3
+	]
+}
+
