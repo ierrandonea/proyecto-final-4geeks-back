@@ -1,6 +1,5 @@
-
-# Created by https://www.toptal.com/developers/gitignore/api/python,flask,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,flask,visualstudiocode
+### Database ###
+/migrations
 
 ### Flask ###
 instance/*
