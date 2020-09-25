@@ -1,27 +1,17 @@
 import json
-<<<<<<< HEAD
-import datetime
-from flask import Flask, request, jsonify, render_template
-=======
 import os
 import datetime
 from flask import Flask, request, jsonify, render_template, send_from_directory
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-<<<<<<< HEAD
-from werkzeug.utils import secure_filename
-from models import db, User, Product, Category, ProductCategory
-=======
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 from operator import itemgetter
 from models import db, User, Product, Category, ProductCategory, Content
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
 from config import Development
 
 app = Flask(__name__)
@@ -79,24 +69,6 @@ def register():
     address = request.json.get("address", None)
 
     if not name:
-<<<<<<< HEAD
-        return jsonify({"msg": {"name": "Name is required"}}), 400
-
-    if not last_name:
-        return jsonify({"msg": {"last_name": "Last name is required"}}), 400
-
-    if not email:
-        return jsonify({"msg": {"reg_email": "Email is required"}}), 400
-
-    if not address:
-        return jsonify({"msg": {"address": "Address is required"}}), 400
-
-    if not password:
-        return jsonify({"msg": {"reg_password": "Password is required"}}), 400
-
-    if not phone:
-        return jsonify({"msg": {"phone": "Phone is required"}}), 400
-=======
         return jsonify({"msg": "Name is required"}), 400
 
     if not last_name:
@@ -113,7 +85,6 @@ def register():
 
     if not address:
         return jsonify({"msg": "Address is required"}), 400
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
 
     user = User.query.filter_by(email=email).first()
     print(user)
@@ -197,11 +168,7 @@ def categories(id=None):
 @app.route("/api/products/", methods=['GET', 'POST'])
 @app.route("/api/products/brewing", methods=['POST'])
 @app.route("/api/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-<<<<<<< HEAD
-def products(id=None, sorting=None):
-=======
 def products(id=None):
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
     if request.method == 'GET':
         if sorting is not None:
             if sorting == 'priceup':
@@ -221,45 +188,6 @@ def products(id=None):
                 map(lambda product: product.serialize_w_categories(), products))
             return jsonify(products), 200
     if request.method == 'POST':
-<<<<<<< HEAD
-        sku = request.json.get("sku", None)
-        brand = request.json.get("brand", None)
-        name = request.json.get("name", None)
-        presentation = request.json.get("presentation", None)
-        price = request.json.get("price", None)
-        stock = request.json.get("stock", None)
-        origin = request.json.get("origin", None)
-        species = request.json.get("species", None)
-        ground = request.json.get("ground", None)
-        acidity = request.json.get("acidity", None)
-        roasting = request.json.get("roasting", None)
-        description = request.json.get("description", None)
-        image = request.json.get("image", None)
-        categories = request.json.get("categories", None)
-        if not sku and price and brand and name and presentation and attributes and description:
-            return jsonify({"msg": "some fields are missing"}), 400
-        else:
-            product = Product()
-            product.sku = sku
-            product.brand = brand
-            product.name = name
-            product.price = price
-            product.stock = stock
-            product.origin = origin
-            product.species = species
-            product.ground = ground
-            product.acidity = acidity
-            product.roasting = roasting
-            product.presentation = presentation
-            product.description = description
-            product.image = image
-            for category in categories:
-                p_cat = Category.query.get(category)
-                p_cat.category_id = category
-                product.categories.append(p_cat)
-            product.save()
-            return jsonify(product.serialize_w_categories()), 201
-=======
         # the parameters below are to get products filtered
         sorting = request.json.get("sorting", None)
         groundFilter = request.json.get("groundFilter", None)
@@ -373,26 +301,10 @@ def products(id=None):
                 product.categories.append(p_cat)
             product.save()
             return jsonify(product.serialize_w_categories()), 201 
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
     if request.method == 'PUT':
         if not id:
             return jsonify({"msg": "product not found"}), 404
         else:
-<<<<<<< HEAD
-            sku = request.json.get("sku", None)
-            brand = request.json.get("brand", None)
-            name = request.json.get("name", None)
-            presentation = request.json.get("presentation", None)
-            price = request.json.get("price", None)
-            stock = request.json.get("stock", None)
-            origin = request.json.get("origin", None)
-            species = request.json.get("species", None)
-            ground = request.json.get("ground", None)
-            acidity = request.json.get("acidity", None)
-            roasting = request.json.get("roasting", None)
-            description = request.json.get("description", None)
-            image = request.json.get("image", None)
-=======
             sku= request.json.get("sku", None)
             brand= request.json.get("brand", None)
             name= request.json.get("name", None)
@@ -406,27 +318,10 @@ def products(id=None):
             roasting= request.json.get("roasting", None)
             description= request.json.get("description", None)
             image= request.json.get("image", None)
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
             # if not sku or price or brand or name or presentation or attributes or description or stock:
             if not sku:
                 return jsonify({"msg": "some fields are missing"}), 400
             else:
-<<<<<<< HEAD
-                product = Product.query.get(id)
-                product.sku = sku
-                product.brand = brand
-                product.name = name
-                product.price = price
-                product.stock = stock
-                product.origin = origin
-                product.species = species
-                product.ground = ground
-                product.acidity = acidity
-                product.roasting = roasting
-                product.presentation = presentation
-                product.description = description
-                product.image = image
-=======
                 product= Product.query.get(id)
                 product.sku= sku
                 product.brand= brand
@@ -441,7 +336,6 @@ def products(id=None):
                 product.presentation= presentation
                 product.description= description
                 product.image= image
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
                 product.update()
                 return jsonify(product.serialize()), 200
     if request.method == 'DELETE':
@@ -514,9 +408,4 @@ def content(id=None):
 
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
-<<<<<<< HEAD
-
     manager.run()
-=======
-    manager.run()
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
