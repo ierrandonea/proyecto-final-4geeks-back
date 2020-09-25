@@ -4,7 +4,6 @@ db = SQLAlchemy()
 
 # to consult database schema: https://dbdesigner.page.link/xvnBfzE4JMMCnLmx5
 
-
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -373,4 +372,34 @@ class Event(db.Model):
 #     ▀▄▒▒▒▒▒▒▒▒▒▒▄▄▄▀▒▒▒▒▄▀   
 #       ▀▄▄▄▄▄▄▀▀▀▒▒▒▒▒▄▄▀     
 #          ▀▀▀▀▀▀▀▀▀▀▀▀        
-     
+
+
+# def sortingMethods(sorting, data):
+#             if sorting == 'priceup':
+#                 products= data
+#                 products=list(map(lambda product: product.serialize_w_categories(), products))
+#                 return jsonify(products), 200
+#             elif sorting == 'pricedown':
+#                 products= data
+#                 products= list(map(lambda product: product.serialize_w_categories(), products))
+#                 return jsonify(products), 200
+#             elif sorting == 'brandup':
+#                 products= data
+#                 products= list(map(lambda product: product.serialize_w_categories(), products))
+#                 return jsonify(products), 200
+#             elif sorting == 'branddown':
+#                 products= data
+#                 products= list(map(lambda product: product.serialize_w_categories(), products))
+#                 return jsonify(products), 200
+#         if originFilter:
+#             filteredProducts = Product.query.filter(Product.origin.in_((originFilter))).all()
+#             sortingMethods(sorting, filteredProducts)                 
+#         elif typesFilter:
+#             filteredProducts = Product.query.filter(Product.presentation.in_((typesFilter))).all()
+#             sortingMethods(sorting, filteredProducts)
+#         elif originFilter and typesFilter:
+#             distilledProducts = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((typesFilter))).all()  
+#             sortingMethods(sorting, distilledProducts)                  
+#         elif not originFilter and typesFilter:
+#             rawProducts= Product.query.all()
+#             sortingMethods(sorting, rawProducts)
