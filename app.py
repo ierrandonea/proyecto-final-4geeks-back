@@ -270,9 +270,9 @@ def products(id=None):
             elif sorting == 'branddown':
                 products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
-                return jsonify(products), 200
+                return jsonify(products), 200     
         # here on is all to validate data on new products          
-        if not sku and not price and not brand and not name and not presentation and not price and notstock and not origin and not species and not ground and not acidity and not roasting and not description:
+        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
             return jsonify({"msg": "some fields are missing"}), 400
         else:
             product= Product()
@@ -404,3 +404,72 @@ def content(id=None):
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
     manager.run()
+
+# this an untested, complete version of a recursive filtered query
+# def distillingCoffee(sorting, priceMin, priceMax, ratingMin, ratingMax, **filters):
+#     origin= filters.get('originFilter', None)
+#     ground= filters.get('groundFilter', None)
+#     categories= filters.get('categoryFilter', None)
+#     def handleSorting(sorting):
+#         if sorting == 'priceup':
+#             sortingHandled = Product.price.asc()
+#         elif sorting == 'pricedown':
+#             sortingHandled = Product.price.desc()
+#         elif sorting == 'brandup':
+#             sortingHandled = Product.brand.asc()
+#         else:
+#             sortingHandled = Product.brand.desc()
+#     originHandled = Product.origin.in_((origin))
+#     groundHandled = Product.origin.in_((ground))
+#     categoriesHandled = Product.categories.in_((categories))
+#     if not origin and not ground and not categories:
+#         return Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif origin and not ground and not categories:
+#         return Product.query.filter(originHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif ground and not origin and not categories:
+#         return Product.query.filter(groundHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif categories and not origin and not ground:
+#         return Product.query.filter(categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif origin and ground and not categories:
+#         return Product.query.filter(originHandled, groundHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif origin and categories and not ground:
+#         return Product.query.filter(originHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     elif ground and categories and not origin:
+#         return Product.query.filter(groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+#     else:
+#         return Product.query.filter(originHandled, groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
+
+
+# this a version without ratings, for testing purposes
+# def distillingCoffee(sorting, priceMin, priceMax, **filters):
+#     origin= filters.get('originFilter', None)
+#     ground= filters.get('groundFilter', None)
+#     categories= filters.get('categoryFilter', None)
+#     def handleSorting(sorting):
+#         if sorting == 'priceup':
+#             sorting = Product.price.asc()
+#         elif sorting == 'pricedown':
+#             sorting = Product.price.desc()
+#         elif sorting == 'brandup':
+#             sorting = Product.brand.asc()
+#         else:
+#             sorting = Product.brand.desc()
+#     originHandled = Product.origin.in_((origin))
+#     groundHandled = Product.origin.in_((ground))
+#     categoriesHandled = Product.categories.in_((categories))
+#     if not origin and not ground and not categories:
+#         return Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif origin and not ground and not categories:
+#         return Product.query.filter(originHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif ground and not origin and not categories:
+#         return Product.query.filter(groundHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif categories and not origin and not ground:
+#         return Product.query.filter(categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif origin and ground and not categories:
+#         return Product.query.filter(originHandled, groundHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif origin and categories and not ground:
+#         return Product.query.filter(originHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     elif ground and categories and not origin:
+#         return Product.query.filter(groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#     else:
+#         return Product.query.filter(originHandled, groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
