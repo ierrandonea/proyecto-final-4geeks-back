@@ -53,11 +53,14 @@ class Product(db.Model):
     acidity = db.Column(db.Integer, nullable=False)
     roasting = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
-    image = db.Column(db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
+    image = db.Column(
+        db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
     ratings = db.relationship("ProductRating", backref="product", lazy=True)
-    categories = db.relationship('Category', secondary="product_categories", lazy=True)
+    categories = db.relationship(
+        'Category', secondary="product_categories", lazy=True)
     orders = db.relationship('OrderDetail', backref="product", lazy=True)
-    def serialize(self):        
+
+    def serialize(self):
         return{
             "id": self.id,
             "sku": self.sku,
@@ -364,34 +367,37 @@ class Event(db.Model):
 #     ▀▄▒▒▒▒▒▒▒▒▒▒▄▄▄▀▒▒▒▒▄▀   
 #       ▀▄▄▄▄▄▄▀▀▀▒▒▒▒▒▄▄▀     
 #          ▀▀▀▀▀▀▀▀▀▀▀▀        
+     
 
-
-# def sortingMethods(sorting, data):
-#             if sorting == 'priceup':
-#                 products= data
-#                 products=list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'pricedown':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'brandup':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'branddown':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#         if originFilter:
-#             filteredProducts = Product.query.filter(Product.origin.in_((originFilter))).all()
-#             sortingMethods(sorting, filteredProducts)                 
-#         elif typesFilter:
-#             filteredProducts = Product.query.filter(Product.presentation.in_((typesFilter))).all()
-#             sortingMethods(sorting, filteredProducts)
-#         elif originFilter and typesFilter:
-#             distilledProducts = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((typesFilter))).all()  
-#             sortingMethods(sorting, distilledProducts)                  
-#         elif not originFilter and typesFilter:
-#             rawProducts= Product.query.all()
-#             sortingMethods(sorting, rawProducts)
+#      {
+#     "attributes": {
+#       "acidity": "7",
+#       "origin": "Colombia",
+#       "roasting": "65 AGS",
+#       "species": "Robusta",
+#       "type": "Molido"
+#     },
+#     "brand": "Finca Test",
+#     "categories": [1,3],
+#     "description": "Lorem ipsum dolor sit amen.",
+#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
+#     "name": "Debugging coffee",
+#     "presentation": [
+#       {
+#         "format": "150gr",
+#         "price": "5600",
+#         "stock": 16
+#       },
+#       {
+#         "format": "260gr",
+#         "price": "9600",
+#         "stock": 14
+#       },
+#       {
+#         "format": "1kg",
+#         "price": "15000",
+#         "stock": 9
+#       }
+#     ],
+#     "sku": "4gB-FP-4Geeks-a11"
+#   }

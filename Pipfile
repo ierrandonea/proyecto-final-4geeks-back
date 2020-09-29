@@ -14,6 +14,7 @@ flask-script = "*"
 flask-jwt-extended = "*"
 pymysql = "*"
 cryptography = "*"
+mercadopago = "*"
 
 [requires]
 python_version = "3.8"

@@ -9,5 +9,5 @@ class Development(Base):
     DEBUG = True
     ENV = 'development'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://ierrandonea:Abc77978155@localhost:3306/coffee_back'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:19699815@localhost:3306/coffee_back'
     JWT_SECRET_KEY = "ba2c9a390a763c9ac2c1a1071652d21a" 
