@@ -53,13 +53,6 @@ class Product(db.Model):
     acidity = db.Column(db.Integer, nullable=False)
     roasting = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
-<<<<<<< HEAD
-    image = db.Column(db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
-    ratings = db.relationship("ProductRating", backref="product", lazy=True)
-    categories = db.relationship('Category', secondary="product_categories", lazy=True)
-    orders = db.relationship('OrderDetail', backref="product", lazy=True)
-    def serialize(self):        
-=======
     image = db.Column(
         db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
     ratings = db.relationship("ProductRating", backref="product", lazy=True)
@@ -68,7 +61,6 @@ class Product(db.Model):
     orders = db.relationship('OrderDetail', backref="product", lazy=True)
 
     def serialize(self):
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
         return{
             "id": self.id,
             "sku": self.sku,
@@ -85,15 +77,8 @@ class Product(db.Model):
             "description": self.description,
             "image": self.image
         }
-<<<<<<< HEAD
     def serialize_w_categories(self):
         categories = list(map(lambda category: category.serialize(), self.categories))        
-=======
-
-    def serialize_w_categories(self):
-        categories = list(
-            map(lambda category: category.serialize(), self.categories))
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
         return{
             "id": self.id,
             "sku": self.sku,
@@ -123,55 +108,6 @@ class Product(db.Model):
 
 # please register products sending info this way:
 # {
-<<<<<<< HEAD
-#     "attributes": {
-#       "acidity": "6",
-#       "origin": "Colombia",
-#       "roasting": "95 AGS",
-#       "species": "Arabica",
-#       "type": "Molido"
-#     },
-#     "brand": "4Geeks Coffee",
-#     "description": "Lorem ipsum dolor sit amen.",
-#     "image": "base_placeholder-Cecilia-Lorenzo-Inaki.jpg",
-#     "name": "Console.log(Coffee)",
-#     "presentation": [
-#       {
-#         "format": "100gr",
-#         "stock": 22,
-#         "price": "3590"
-#       },
-#       {
-#         "format": "210gr",
-#         "stock": 10,
-#         "price": "6500"
-#       },
-#       {
-#         "format": "370gr",
-#         "stock": 19,
-#         "price": "12000"
-#       }
-#     ],
-#     "sku": "4gB-FP-4Geeks-ftVII",
-#     "categories": [1,3]
-#   }
-
-# class Content(db.Model):
-#     __tablename__ = 'contents'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(120), nullable=False)
-#     cover = db.Column(db.String(255), nullable=False)
-#     images = db.Column(db.String(255), nullable=False)
-#     resume = db.Column(db.String(280), nullable=False)
-#     body = db.Column(db.Text, nullable=False)
-#     # please organize large text areas as:
-#     # {
-#         # "paragraph_1": "lorem ipsum...",
-#         # "paragraph_2": "lorem ipsum...",
-#         # ...
-#     # }   
-#     # content_ratings = db.relationship("content_ratings", backref="contents")
-=======
 # 	"sku": "4gB-FP-4Geeks-ft21",
 # 	"brand": "4Geeks Coffee",
 # 	"name": "Monroy Café",
@@ -204,7 +140,6 @@ class Content(db.Model):
         # ...
     # }
     # content_ratings = db.relationship("content_ratings", backref="contents")
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
 
     def serialize(self):
         return{
@@ -223,17 +158,6 @@ class Content(db.Model):
     def update(self):
         db.session.commit()
 
-<<<<<<< HEAD
-class ProductRating(db.Model):
-    __tablename__ = 'product_ratings'
-    id = db.Column(db.Integer, primary_key=True)     
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    stars = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.String(280), nullable=True)
-    date = db.Column(db.Date, nullable=False)
-
-=======
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -247,7 +171,6 @@ class ProductRating(db.Model):
     comment = db.Column(db.String(280), nullable=True)
     date = db.Column(db.Date, nullable=False)
 
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
     def serialize(self):
         return{
             "id": self.id,
@@ -414,17 +337,12 @@ class Event(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
-<<<<<<< HEAD
-
-    def update(self):
-=======
 
     def update(self):
         db.session.commit()
 
     def delete(self):
         db.session.delete(self)
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
         db.session.commit()
 
     def delete(self):
@@ -453,7 +371,6 @@ class Event(db.Model):
 #     ▀▄▒▒▒▒▒▒▒▒▒▒▄▄▄▀▒▒▒▒▄▀   
 #       ▀▄▄▄▄▄▄▀▀▀▒▒▒▒▒▄▄▀     
 #          ▀▀▀▀▀▀▀▀▀▀▀▀        
-<<<<<<< HEAD
      
 
 #      {
@@ -488,36 +405,3 @@ class Event(db.Model):
 #     ],
 #     "sku": "4gB-FP-4Geeks-a11"
 #   }
-=======
-
-
-# def sortingMethods(sorting, data):
-#             if sorting == 'priceup':
-#                 products= data
-#                 products=list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'pricedown':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'brandup':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#             elif sorting == 'branddown':
-#                 products= data
-#                 products= list(map(lambda product: product.serialize_w_categories(), products))
-#                 return jsonify(products), 200
-#         if originFilter:
-#             filteredProducts = Product.query.filter(Product.origin.in_((originFilter))).all()
-#             sortingMethods(sorting, filteredProducts)                 
-#         elif typesFilter:
-#             filteredProducts = Product.query.filter(Product.presentation.in_((typesFilter))).all()
-#             sortingMethods(sorting, filteredProducts)
-#         elif originFilter and typesFilter:
-#             distilledProducts = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((typesFilter))).all()  
-#             sortingMethods(sorting, distilledProducts)                  
-#         elif not originFilter and typesFilter:
-#             rawProducts= Product.query.all()
-#             sortingMethods(sorting, rawProducts)
->>>>>>> 86115f8daf61a9296b6fc8ce0302b834bf1676f1
