@@ -270,7 +270,7 @@ def products(id=None):
             elif sorting == 'branddown':
                 products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
-                return jsonify(products), 200     
+                return jsonify(products), 200            
         # here on is all to validate data on new products          
         if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
             return jsonify({"msg": "some fields are missing"}), 400
@@ -406,70 +406,44 @@ if __name__ == "__main__":
     manager.run()
 
 # this an untested, complete version of a recursive filtered query
-# def distillingCoffee(sorting, priceMin, priceMax, ratingMin, ratingMax, **filters):
-#     origin= filters.get('originFilter', None)
-#     ground= filters.get('groundFilter', None)
-#     categories= filters.get('categoryFilter', None)
-#     def handleSorting(sorting):
-#         if sorting == 'priceup':
-#             sortingHandled = Product.price.asc()
-#         elif sorting == 'pricedown':
-#             sortingHandled = Product.price.desc()
-#         elif sorting == 'brandup':
-#             sortingHandled = Product.brand.asc()
-#         else:
-#             sortingHandled = Product.brand.desc()
-#     originHandled = Product.origin.in_((origin))
-#     groundHandled = Product.origin.in_((ground))
-#     categoriesHandled = Product.categories.in_((categories))
-#     if not origin and not ground and not categories:
-#         return Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif origin and not ground and not categories:
-#         return Product.query.filter(originHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif ground and not origin and not categories:
-#         return Product.query.filter(groundHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif categories and not origin and not ground:
-#         return Product.query.filter(categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif origin and ground and not categories:
-#         return Product.query.filter(originHandled, groundHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif origin and categories and not ground:
-#         return Product.query.filter(originHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     elif ground and categories and not origin:
-#         return Product.query.filter(groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-#     else:
-#         return Product.query.filter(originHandled, groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax), Product.ratings.between(ratingMin, ratingMax)).order_by(sortingHandled).all()
-
-
-# this a version without ratings, for testing purposes
 # def distillingCoffee(sorting, priceMin, priceMax, **filters):
-#     origin= filters.get('originFilter', None)
-#     ground= filters.get('groundFilter', None)
-#     categories= filters.get('categoryFilter', None)
-#     def handleSorting(sorting):
-#         if sorting == 'priceup':
-#             sorting = Product.price.asc()
-#         elif sorting == 'pricedown':
-#             sorting = Product.price.desc()
-#         elif sorting == 'brandup':
-#             sorting = Product.brand.asc()
+#             origin= filters.get('originFilter', None)
+#             ground= filters.get('groundFilter', None)
+#             def handleSorting(sorting):
+#                 if sorting == 'priceup':
+#                     sorting = Product.price.asc()
+#                     return sorting
+#                 elif sorting == 'pricedown':
+#                     sorting = Product.price.desc()
+#                     return sorting
+#                 elif sorting == 'brandup':
+#                     sorting = Product.brand.asc()
+#                     return sorting
+#                 else:
+#                     sorting = Product.brand.desc()
+#                     return sorting
+#             categoriesHandled = Product.categories.in_((categories))
+#             if origin and not ground:
+#                 return Product.query.filter(Product.origin.in_((origin)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled()).all()
+#             elif ground and not origin:
+#                 return Product.query.filter(Product.origin.in_((ground)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled()).all()
+#             elif origin and ground:
+#                 return Product.query.filter(Product.origin.in_((origin)),  Product.origin.in_((ground)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled()).all()
+#             else:
+#                 return Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled()).all()
+#         if not groundFilter and originFilter:
+#             kalhua = distillingCoffee(sorting, pricefilterMin, pricefilterMax, origin=originFilter)
+#             products = list(map(lambda product: kalhua.serialize_w_categories(), kalhua))
+#             products = jsonify(products), 200
+#         if not originFilter and groundFilter:
+#             kalhua = distillingCoffee(sorting, pricefilterMin, pricefilterMax, ground=groundFilter)
+#             products = list(map(lambda product: kalhua.serialize_w_categories(), kalhua))
+#             products = jsonify(products), 200
+#         if originFilter and groundFilter:
+#             kalhua = distillingCoffee(sorting, pricefilterMin, pricefilterMax, origin=originFilter, ground=groundFilter)
+#             products = list(map(lambda product: kalhua.serialize_w_categories(), kalhua))
+#             products = jsonify(products), 200
 #         else:
-#             sorting = Product.brand.desc()
-#     originHandled = Product.origin.in_((origin))
-#     groundHandled = Product.origin.in_((ground))
-#     categoriesHandled = Product.categories.in_((categories))
-#     if not origin and not ground and not categories:
-#         return Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif origin and not ground and not categories:
-#         return Product.query.filter(originHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif ground and not origin and not categories:
-#         return Product.query.filter(groundHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif categories and not origin and not ground:
-#         return Product.query.filter(categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif origin and ground and not categories:
-#         return Product.query.filter(originHandled, groundHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif origin and categories and not ground:
-#         return Product.query.filter(originHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     elif ground and categories and not origin:
-#         return Product.query.filter(groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
-#     else:
-#         return Product.query.filter(originHandled, groundHandled, categoriesHandled, Product.price.between(pricefilterMin, pricefilterMax)).order_by(sortingHandled).all()
+#             kalhua = distillingCoffee(sorting, pricefilterMin, pricefilterMax)
+#             products = list(map(lambda product: kalhua.serialize_w_categories(), kalhua))
+#             products = jsonify(products), 200
