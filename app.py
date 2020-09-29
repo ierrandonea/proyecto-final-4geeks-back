@@ -6,10 +6,9 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-
+from operator import itemgetter
 from models import db, User, Product, Category, ProductCategory, Content
 from config import Development
 
@@ -68,22 +67,22 @@ def register():
     address = request.json.get("address", None)
 
     if not name:
-        return jsonify({"msg": "Name is required"}), 400
+        return jsonify({"msg": {"name": "Name is required"}}), 400
 
     if not last_name:
-        return jsonify({"msg": "Last name is required"}), 400
-
-    if not password:
-        return jsonify({"msg": "Password is required"}), 400
+        return jsonify({"msg": {"last_name": "Last name is required"}}), 400
 
     if not email:
-        return jsonify({"msg": "Email is required"}), 400
-
-    if not phone:
-        return jsonify({"msg": "Phone is required"}), 400
+        return jsonify({"msg": {"reg_email": "Email is required"}}), 400
 
     if not address:
-        return jsonify({"msg": "Address is required"}), 400
+        return jsonify({"msg": {"address": "Address is required"}}), 400
+
+    if not password:
+        return jsonify({"msg": {"reg_password": "Password is required"}}), 400
+
+    if not phone:
+        return jsonify({"msg": {"phone": "Phone is required"}}), 400
 
     user = User.query.filter_by(email=email).first()
     print(user)
@@ -185,8 +184,6 @@ def products(id=None):
         sorting = request.json.get("sorting", None)
         groundFilter = request.json.get("groundFilter", None)
         originFilter = request.json.get("originFilter", None)
-        pricefilterMin = request.json.get("pricefilterMin", None)
-        pricefilterMax = request.json.get("pricefilterMax", None)
         # the parameter below are for registering a new product
         sku= request.json.get("sku", None)
         brand= request.json.get("brand", None)
@@ -202,73 +199,73 @@ def products(id=None):
         description= request.json.get("description", None)
         image= request.json.get("image", None)
         categories= request.json.get("categories", None)
-        # all below validates for the filters, I know it's not the prettiest code in the world, but it works ;)
+        # all below validates for the filters
         if not groundFilter and originFilter:
             if sorting == 'priceup':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.asc()).all()
-                products = products
+                products = Product.query.filter(Product.origin.in_((originFilter))).order_by(Product.price.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'pricedown':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.desc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter))).order_by(Product.price.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'brandup':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.asc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter))).order_by(Product.brand.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'branddown':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter))).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200                  
         elif not originFilter and groundFilter:
             if sorting == 'priceup':
-                products = Product.query.filter(Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.asc()).all()
+                products = Product.query.filter(Product.ground.in_((groundFilter))).order_by(Product.price.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'pricedown':
-                products = Product.query.filter(Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.desc()).all()
+                products = Product.query.filter(Product.ground.in_((groundFilter))).order_by(Product.price.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'brandup':
+                products = Product.query.filter(Product.ground.in_((groundFilter))).order_by(Product.brand.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'branddown':
-                products = Product.query.filter(Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
+                products = Product.query.filter(Product.ground.in_((groundFilter))).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200  
         elif originFilter and groundFilter:
             if sorting == 'priceup':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.asc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((groundFilter))).order_by(Product.price.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'pricedown':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.desc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((groundFilter))).order_by(Product.price.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'brandup':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.asc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((groundFilter))).order_by(Product.brand.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'branddown':
-                products = Product.query.filter(Product.origin.in_((originFilter)), Product.ground.in_((groundFilter)), Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
+                products = Product.query.filter(Product.origin.in_((originFilter)), Product.presentation.in_((groundFilter))).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200                
-        else:
+        elif not originFilter and not groundFilter:
             if sorting == 'priceup':
-                products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.asc()).all()
+                products = Product.query.order_by(Product.price.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'pricedown':
-                products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.price.desc()).all()
+                products = Product.query.order_by(Product.price.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'brandup':
-                products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.asc()).all()
+                products = Product.query.order_by(Product.brand.asc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
             elif sorting == 'branddown':
-                products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
+                products = Product.query.order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200
         # here on is all to validate data on new products          
