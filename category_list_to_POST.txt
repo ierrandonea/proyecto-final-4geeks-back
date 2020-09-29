@@ -2,13 +2,16 @@
 
 {
 	"name": "Orgánico"
-},
+}
+
 {
 	"name": "Single Origin"
-},
+}
+
 {
 	"name": "Multi Origin"
-},
+}
+
 {
 	"name": "Premiado"
 }
