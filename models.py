@@ -13,7 +13,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(120), default="isUser")
     user_ratings = db.relationship("ProductRating", backref="user", lazy=True)
     orders = db.relationship("Order", backref="user", lazy=True)
 

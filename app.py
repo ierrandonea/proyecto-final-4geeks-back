@@ -68,6 +68,7 @@ def register():
     email = request.json.get("email", None)
     phone = request.json.get("phone", None)
     address = request.json.get("address", None)
+    role = request.json.get("role", None)
 
     if not name:
         return jsonify({"msg": {"name": "Name is required"}}), 400
@@ -97,6 +98,7 @@ def register():
     user.email = email
     user.phone = phone
     user.address = address
+    user.role = role
     user.save()
 
     expire_in = datetime.timedelta(days=3)
@@ -108,6 +110,7 @@ def register():
     return jsonify(data), 200
 
 @app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+@app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'POST', 'DELETE'])
 def users(id=None):
     if request.method == 'GET':
         if id is not None:
@@ -120,6 +123,28 @@ def users(id=None):
             users = User.query.all()
             users = list(map(lambda user: users.serialize(), users))
             return jsonify(users), 200
+    if request.method == 'POST':
+        sorting = request.json.get("sorting", None)
+        admin = request.json.get("is_admin", None)
+        if admin:
+            if sorting == 'namedown':
+                users = User.query.filter(User.role.in_((admin))).order_by(User.name.desc()).all()
+                users = list(map(lambda user: user.serialize_w_categories(), users))
+                return jsonify(users), 200
+            else:
+                users = User.query.filter(User.role.in_((admin))).order_by(User.name.asc()).all()
+                users = list(map(lambda user: user.serialize_w_categories(), users))
+                return jsonify(users), 200
+        else:
+            if sorting == 'namedown':
+                users = User.query.order_by(User.name.desc()).all()
+                users = list(map(lambda user: user.serialize_w_categories(), users))
+                return jsonify(users), 200
+            else:
+                users = User.query.order_by(User.name.asc()).all()
+                users = list(map(lambda user: user.serialize_w_categories(), users))
+                return jsonify(users), 200
+
     if request.method == 'PUT':
         if not id:
             return jsonify({"msg": "user not found"}), 404
