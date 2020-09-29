@@ -48,6 +48,9 @@ def login():
     if not check_password_hash(user.password, password):
         return jsonify({"msg": {"not_password": "Email/password is incorrect"}}), 401
 
+    if user:
+        return jsonify({"msg": {"reg_not_user": "User already exists"}}), 400
+
     expire_in = datetime.timedelta(days=3)
     data = {
         "access_token": create_access_token(identity=user.id, expires_delta=expire_in),
@@ -87,9 +90,6 @@ def register():
     user = User.query.filter_by(email=email).first()
     print(user)
 
-    if user:
-        return jsonify({"msg": {"reg_not_user": "User already exists"}}), 400
-
     user = User()
     user.name = name
     user.last_name = last_name
@@ -107,6 +107,36 @@ def register():
 
     return jsonify(data), 200
 
+@app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def users(id=None):
+    if request.method == 'GET':
+        if id is not None:
+            user = Users.query.get(id)
+            if user:
+                return jsonify(user.serialize()), 200
+            else:
+                return jsonify({"msg": "User not found"}), 404
+        else:
+            users = User.query.all()
+            users = list(map(lambda user: users.serialize(), users))
+            return jsonify(users), 200
+    if request.method == 'PUT':
+        if not id:
+            return jsonify({"msg": "user not found"}), 404
+        else:
+            user = request.json.get("user", None)
+            if not user:
+                return jsonify({"msg": "user is missing"}), 400
+            else:
+                user = User.query.get(id)
+                user.update()
+                return jsonify(user.serialize()), 200
+    if request.method == 'DELETE':
+        user = User.query.get(id)
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
+        user.delete()
+        return jsonify({"msg": "User succesfully deleted"}), 200
 
 @app.route("/api/profile")
 @jwt_required
@@ -115,9 +145,8 @@ def profile():
     id = get_jwt_identity()
     user = User.query.get(id)
     return jsonify(user.serialize()), 200
-
+   
 # @app.route("/api/users", methods=['GET', 'POST', 'PUT', 'DELETE'])
-
 
 @app.route("/api/categories/", methods=['GET', 'POST'])
 @app.route("/api/categories/<int:id>", methods=['GET', 'PUT', 'DELETE'])

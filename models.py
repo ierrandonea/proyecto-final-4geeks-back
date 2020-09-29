@@ -13,6 +13,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(120), nullable=False)
     user_ratings = db.relationship("ProductRating", backref="user", lazy=True)
     orders = db.relationship("Order", backref="user", lazy=True)
 
@@ -23,7 +24,8 @@ class User(db.Model):
             "name": self.name,
             "last_name": self.last_name,
             "phone": self.phone,
-            "address": self.address
+            "address": self.address,
+            "role": self.role
         }
 
     def save(self):
