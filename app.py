@@ -107,7 +107,7 @@ def register():
     return jsonify(data), 200
 
 @app.route("/api/admincoffee/users/", methods=['GET', 'POST'])
-@app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'POST', 'DELETE'])
+@app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'DELETE'])
 def users(id=None):
     if request.method == 'GET':
         if id is not None:
@@ -146,11 +146,24 @@ def users(id=None):
         if not id:
             return jsonify({"msg": "user not found"}), 404
         else:
-            user = request.json.get("user", None)
-            if not user:
-                return jsonify({"msg": "user is missing"}), 400
+            name = request.json.get("name", None)
+            last_name = request.json.get("last_name", None)
+            password = request.json.get("password", None)
+            email = request.json.get("email", None)
+            phone = request.json.get("phone", None)
+            address = request.json.get("address", None)
+            role = request.json.get("role", None)
+            if not name and not last_name and not password and not email and not phone and not address and not role:
+                return ({"msg": "Some fields are missing!"})
             else:
                 user = User.query.get(id)
+                user.name = name
+                user.last_name = last_name
+                user.password = password
+                user.email = email
+                user.phone = phone
+                user.address = address
+                user.role = role
                 user.update()
                 return jsonify(user.serialize()), 200
     if request.method == 'DELETE':
@@ -364,8 +377,8 @@ def products(id=None):
             roasting= request.json.get("roasting", None)
             description= request.json.get("description", None)
             image= request.json.get("image", None)
-            # if not sku or price or brand or name or presentation or attributes or description or stock:
-            if not sku:
+            categories= request.json.get("categories", None)
+            if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
                 return jsonify({"msg": "some fields are missing"}), 400
             else:
                 product= Product.query.get(id)
