@@ -23,7 +23,6 @@ manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 CORS(app)
 
-
 @app.route("/")
 def main():
     return render_template('index.html')
@@ -384,12 +383,14 @@ def products(id=None):
                 product.image= image
                 product.update()
                 return jsonify(product.serialize()), 200
+
     if request.method == 'DELETE':
-        product= Product.query.get(id)
+        product = Product.query.get(id)
         if not product:
             return jsonify({"msg": "Product not found"}), 404
-        product.delete()
-        return jsonify({"msg": "Product succesfully deleted"}), 200
+        else:            
+            product.delete()
+            return jsonify({"msg": "Product succesfully deleted"}), 200
 
 
 # @app.route("/api/content", methods=['GET', 'POST', 'PUT', 'DELETE'])
