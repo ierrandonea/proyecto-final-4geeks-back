@@ -125,11 +125,11 @@ def users(id=None):
         role = request.json.get("role", None)
         if role:
             if sorting == 'namedown':
-                users = User.query.filter(User.role.in_(role)).order_by(User.name.desc()).all()
+                users = User.query.filter(User.role == role).order_by(User.name.desc()).all()
                 users = list(map(lambda user: user.serialize(), users))
                 return jsonify(users), 200
             else:
-                users = User.query.filter(User.role.in_(role)).order_by(User.name.asc()).all()
+                users = User.query.filter(User.role == role).order_by(User.name.asc()).all()
                 users = list(map(lambda user: user.serialize(), users))
                 return jsonify(users), 200
         else:
@@ -141,7 +141,6 @@ def users(id=None):
                 users = User.query.order_by(User.name.asc()).all()
                 users = list(map(lambda user: user.serialize(), users))
                 return jsonify(users), 200
-
     if request.method == 'PUT':
         if not id:
             return jsonify({"msg": "user not found"}), 404
