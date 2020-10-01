@@ -55,8 +55,7 @@ class Product(db.Model):
     acidity = db.Column(db.Integer, nullable=False)
     roasting = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
-    image = db.Column(
-        db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
+    image = db.Column(db.String(255), default="base_placeholder-Cecilia-Lorenzo-Inaki.jpg")
     ratings = db.relationship("ProductRating", backref="product", lazy=True)
     categories = db.relationship(
         'Category', secondary="product_categories", lazy=True)

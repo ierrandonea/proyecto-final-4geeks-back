@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 from models import db, User, Product, Category, ProductCategory, Content
 from config import Development
+from libs.functions import allowed_file, isAdmin 
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -24,10 +25,12 @@ manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 CORS(app)
 
+ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg')
+
+
 @app.route("/")
 def main():
     return render_template('index.html')
-
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -166,12 +169,6 @@ def users(id=None):
                 user.role = role
                 user.update()
                 return jsonify(user.serialize()), 200
-    if request.method == 'DELETE':
-        user = User.query.get(id)
-        if not user:
-            return jsonify({"msg": "User not found"}), 404
-        user.delete()
-        return jsonify({"msg": "User succesfully deleted"}), 200
 
 @app.route("/api/profile")
 @jwt_required
@@ -184,8 +181,8 @@ def profile():
 # @app.route("/api/users", methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 
-@app.route("/api/categories/", methods=['GET', 'POST'])
-@app.route("/api/categories/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+@app.route("/api/admincoffee/categories/", methods=['GET', 'POST'])
+@app.route("/api/admincofee/categories/<int:id>", methods=['GET', 'PUT', 'DELETE'])
 def categories(id=None):
     if request.method == 'GET':
         if id is not None:
@@ -228,9 +225,9 @@ def categories(id=None):
         return jsonify({"msg": "Category succesfully deleted"}), 200
 
 
-@app.route("/api/products/", methods=['GET', 'POST'])
+@app.route("/api/products/", methods=['GET'])
 @app.route("/api/products/brewing", methods=['POST'])
-@app.route("/api/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+@app.route("/api/products/<int:id>", methods=['GET'])
 def products(id=None):
     if request.method == 'GET':
         if id is not None:
@@ -244,6 +241,7 @@ def products(id=None):
             products = list(
                 map(lambda product: product.serialize_w_categories(), products))
             return jsonify(products), 200
+
     if request.method == 'POST':
         # the parameters below are to get products filtered
         sorting = request.json.get("sorting", None)
@@ -336,10 +334,120 @@ def products(id=None):
                 products = list(map(lambda product: product.serialize_w_categories(), products))
                 return jsonify(products), 200            
         # here on is all to validate data on new products          
-        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-            return jsonify({"msg": "some fields are missing"}), 400
+
+@app.route("/api/admincoffee/products/", methods=['GET', 'POST'])
+@app.route("/api/admincoffee/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+@jwt_required
+def adminProducts(id=None):
+    if not isAdmin():
+        return jsonify({"msg": "User is not allowed to access"}), 403
+
+    if request.method == 'GET':
+        if id is not None:
+            products = Product.query.get(id)
+            if products:
+                return jsonify(products.serialize_w_categories()), 200
+            else:
+                return jsonify({"msg": "product not found"}), 404
         else:
-            product= Product()
+            products = Product.query.all()
+            products = list(
+                map(lambda product: product.serialize_w_categories(), products))
+            return jsonify(products), 200
+
+    if request.method == 'POST':        
+        # the parameter below are for registering a new product
+        sku= request.form.get("sku", None)
+        brand= request.form.get("brand", None)
+        name= request.form.get("name", None)
+        presentation= request.form.get("presentation", None)
+        price= request.form.get("price", None)
+        stock= request.form.get("stock", None)
+        origin= request.form.get("origin", None)
+        species= request.form.get("species", None)
+        ground= request.form.get("ground", None)
+        acidity= request.form.get("acidity", None)
+        roasting= request.form.get("roasting", None)
+        description= request.form.get("description", None)
+        image= request.form.get("image", None)
+        categories= request.form.get("categories", None)       
+                    
+        # here on is all to validate data on new products          
+        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
+            return jsonify({"msg": "some fields are missing"}), 400  
+
+        product = Product.query.filter_by(sku=sku).first()
+        if product:
+            return jsonify({"msg": "The product already exists in the database"}), 400 
+
+        if 'image' not in request.files: 
+            return jsonify({"msg": {"image": "The product image is missing"}}), 400        
+
+        else:
+            image = request.files['image']
+            images = Product.query.filter(Product.image.in_(image.filename)).first()            
+
+            if image.filename == '':
+                return jsonify({"msg": {"images": "The product image is missing"}}), 400
+
+            elif images:
+                return jsonify({"msg": {"filename": "The product image is missing"}}), 400           
+
+            if image and allowed_file(image.filename, ALLOWED_EXTENSIONS):
+                filename = secure_filename(image.filename)
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'] + '/products/coffee', filename))
+
+        product= Product()
+        product.sku= sku
+        product.brand= brand
+        product.name= name
+        product.price= price
+        product.stock= stock
+        product.origin= origin
+        product.species= species
+        product.ground= ground
+        product.acidity= acidity
+        product.roasting= roasting
+        product.presentation= presentation
+        product.description= description
+        product.image= filename
+        # this one make the realtionship between Product and Category models based on given category id, you MUST create a category before creating a product
+        for category in categories:
+            p_cat= Category.query.get(category)
+            p_cat.category_id= category
+            product.categories.append(p_cat)
+        product.save()
+        return jsonify(product.serialize_w_categories()), 201 
+
+    if request.method == 'PUT':
+        if not id:
+            return jsonify({"msg": "product not found"}), 404
+        else:
+            sku= request.form.get("sku", None)
+            brand= request.form.get("brand", None)
+            name= request.form.get("name", None)
+            presentation= request.form.get("presentation", None)
+            price= request.form.get("price", None)
+            stock= request.form.get("stock", None)
+            origin= request.form.get("origin", None)
+            species= request.form.get("species", None)
+            ground= request.form.get("ground", None)
+            acidity= request.form.get("acidity", None)
+            roasting= request.form.get("roasting", None)
+            description= request.form.get("description", None)
+            image= request.form.get("image", None)
+            categories= request.form.get("categories", None)
+            
+            if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
+                return jsonify({"msg": "some fields are missing"}), 400
+        
+            image = request.files['image']                                  
+
+            if image and allowed_file(image.filename, ALLOWED_EXTENSIONS):
+                filename = secure_filename(image.filename)
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'] + '/products/coffee', filename))
+            
+            product= Product.query.get(id)
             product.sku= sku
             product.brand= brand
             product.name= name
@@ -352,51 +460,10 @@ def products(id=None):
             product.roasting= roasting
             product.presentation= presentation
             product.description= description
-            product.image= image
-            # this one make the realtionship between Product and Category models based on given category id, you MUST create a category before creating a product
-            for category in categories:
-                p_cat= Category.query.get(category)
-                p_cat.category_id= category
-                product.categories.append(p_cat)
-            product.save()
-            return jsonify(product.serialize_w_categories()), 201 
-    if request.method == 'PUT':
-        if not id:
-            return jsonify({"msg": "product not found"}), 404
-        else:
-            sku= request.json.get("sku", None)
-            brand= request.json.get("brand", None)
-            name= request.json.get("name", None)
-            presentation= request.json.get("presentation", None)
-            price= request.json.get("price", None)
-            stock= request.json.get("stock", None)
-            origin= request.json.get("origin", None)
-            species= request.json.get("species", None)
-            ground= request.json.get("ground", None)
-            acidity= request.json.get("acidity", None)
-            roasting= request.json.get("roasting", None)
-            description= request.json.get("description", None)
-            image= request.json.get("image", None)
-            categories= request.json.get("categories", None)
-            if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-                return jsonify({"msg": "some fields are missing"}), 400
-            else:
-                product= Product.query.get(id)
-                product.sku= sku
-                product.brand= brand
-                product.name= name
-                product.price= price
-                product.stock= stock
-                product.origin= origin
-                product.species= species
-                product.ground= ground
-                product.acidity= acidity
-                product.roasting= roasting
-                product.presentation= presentation
-                product.description= description
-                product.image= image
-                product.update()
-                return jsonify(product.serialize()), 200
+            if image:
+                product.image= filename
+            product.update()
+            return jsonify(product.serialize()), 200
 
     if request.method == 'DELETE':
         product = Product.query.get(id)
@@ -467,6 +534,49 @@ def content(id=None):
         product.delete()
         return jsonify({"msg": "Content succesfully deleted"}), 200
 
+@app.route("/api/admincoffee/test/", methods=['GET', 'POST'])
+def addProduct2(id=None):
+    if request.method == 'POST':
+        sku= request.json.get("sku", None)
+        brand= request.json.get("brand", None)
+        name= request.json.get("name", None)
+        presentation= request.json.get("presentation", None)
+        price= request.json.get("price", None)
+        stock= request.json.get("stock", None)
+        origin= request.json.get("origin", None)
+        species= request.json.get("species", None)
+        ground= request.json.get("ground", None)
+        acidity= request.json.get("acidity", None)
+        roasting= request.json.get("roasting", None)
+        description= request.json.get("description", None)
+        image= request.json.get("image", None)
+        categories= request.json.get("categories", None)
+
+        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
+            return jsonify({"msg": "some fields are missing"}), 400
+        else:
+            product= Product()
+            product.sku= sku
+            product.brand= brand
+            product.name= name
+            product.price= price
+            product.stock= stock
+            product.origin= origin
+            product.species= species
+            product.ground= ground
+            product.acidity= acidity
+            product.roasting= roasting
+            product.presentation= presentation
+            product.description= description
+            product.image= image
+            # this one make the realtionship between Product and Category models based on given category id, you MUST create a category before creating a product
+            for category in categories:
+                p_cat= Category.query.get(category)
+                p_cat.category_id= category
+                product.categories.append(p_cat)
+            product.save()
+            return jsonify(product.serialize_w_categories()), 201
+
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
     manager.run()
@@ -513,3 +623,4 @@ if __name__ == "__main__":
 #             kalhua = distillingCoffee(sorting, pricefilterMin, pricefilterMax)
 #             products = list(map(lambda product: kalhua.serialize_w_categories(), kalhua))
 #             products = jsonify(products), 200
+
