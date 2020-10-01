@@ -153,7 +153,7 @@ def users(id=None):
             phone = request.json.get("phone", None)
             address = request.json.get("address", None)
             role = request.json.get("role", None)
-            if not name and not last_name and not password and not email and not phone and not address and not role:
+            if not name and not last_name and not email and not phone and not address and not role:
                 return ({"msg": "Some fields are missing!"})
             else:
                 user = User.query.get(id)
@@ -181,7 +181,18 @@ def profile():
     user = User.query.get(id)
     return jsonify(user.serialize()), 200
    
-# @app.route("/api/users", methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route("/api/users/validation", methods=['POST'])
+def validation():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(email=email).first()
+
+    if not check_password_hash(user.password, password):
+        return jsonify({"msg": {"not_password": "Password is incorrect"}}), 401
+
+    return jsonify({"msg": "ok"}), 200
+
 
 
 @app.route("/api/categories/", methods=['GET', 'POST'])
