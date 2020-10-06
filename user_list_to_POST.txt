@@ -5,7 +5,7 @@
 "email": "iñaki@gmail.com",
 "phone": "898766",
 "address": "Manuel Montt",
-"role": "isAdmin"
+
 }
 
 {
@@ -14,7 +14,8 @@
 "password": "765432",
 "email": "lcastillo@gmail.com",
 "phone": "1122334",
-"address": "Ñuñoa 123"
+"address": "Ñuñoa 123",
+"role": "isAdmin"
 }
 
 {
