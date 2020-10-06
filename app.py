@@ -38,18 +38,18 @@ def login():
     password = request.json.get("password", None)
 
     if not email:
-        return jsonify({"msg": {"email": "Email is required"}}), 400
+        return jsonify({"msg": {"email": "El E-Mail es requerido."}}), 400
 
     if not password:
-        return jsonify({"msg": {"password": "Password is required"}}), 400
+        return jsonify({"msg": {"password": "La contraseña es requerida."}}), 400
 
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        return jsonify({"msg": {"not_user": "Email/password is incorrect"}}), 401
+        return jsonify({"msg": {"not_user": "Email o contraseña incorrectos."}}), 401
 
     if not check_password_hash(user.password, password):
-        return jsonify({"msg": {"not_password": "Email/password is incorrect"}}), 401
+        return jsonify({"msg": {"not_password": "Email o contraseña incorrectos."}}), 401
 
     expire_in = datetime.timedelta(days=3)
     data = {
@@ -71,24 +71,28 @@ def register():
     role = request.json.get("role", None)
 
     if not name:
-        return jsonify({"msg": {"name": "Name is required"}}), 400
+        return jsonify({"msg": {"name": "Nombre es requerido."}}), 400
 
     if not last_name:
-        return jsonify({"msg": {"last_name": "Last name is required"}}), 400
+        return jsonify({"msg": {"last_name": "Apellido es requerido."}}), 400
 
     if not email:
-        return jsonify({"msg": {"reg_email": "Email is required"}}), 400
+        return jsonify({"msg": {"reg_email": "Email es requerido."}}), 400
 
     if not address:
-        return jsonify({"msg": {"address": "Address is required"}}), 400
+        return jsonify({"msg": {"address": "La dirección es requerida."}}), 400
 
     if not password:
-        return jsonify({"msg": {"reg_password": "Password is required"}}), 400
+        return jsonify({"msg": {"reg_password": "Contraseña es requerida."}}), 400
 
     if not phone:
-        return jsonify({"msg": {"phone": "Phone is required"}}), 400
+        return jsonify({"msg": {"phone": "El número telefónico es requerido."}}), 400
 
     user = User.query.filter_by(email=email).first()
+
+    if user:
+        return jsonify({"msg": {"email": "Este usuario ya se encuentra registrado."}}), 400
+
     print(user)
 
     user = User()
@@ -109,10 +113,56 @@ def register():
 
     return jsonify(data), 200
 
+
+@app.route("/api/users/<int:id>", methods=['PUT', 'DELETE'])
+def editUser(id = None):
+    if request.method == 'PUT':
+        if not id:
+            return jsonify({"msg": "user not found"}), 404
+        else:
+            name = request.json.get("name", None)
+            last_name = request.json.get("last_name", None)            
+            email = request.json.get("email", None)
+            phone = request.json.get("phone", None)
+            address = request.json.get("address", None)
+
+            if not name or name == "":
+                return jsonify({"msg": {"name": "Nombre es requerido."}}), 400
+
+            if not last_name or last_name == "":
+                return jsonify({"msg": {"last_name": "Apellido es requerido."}}), 400
+
+            if not email or email == "":
+                return jsonify({"msg": {"reg_email": "Email es requerido."}}), 400
+
+            if not address or address == "":
+                return jsonify({"msg": {"address": "La dirección es requerida."}}), 400            
+
+            if not phone or phone  == "":
+                return jsonify({"msg": {"phone": "El número telefónico es requerido."}}), 400                
+
+            else:
+                user = User.query.get(id)
+                user.name = name
+                user.last_name = last_name                
+                user.email = email
+                user.phone = phone
+                user.address = address                               
+                user.update()
+
+                expire_in = datetime.timedelta(days=3)
+                data = {
+                    "access_token": create_access_token(identity=user.id, expires_delta=expire_in),
+                    "user": user.serialize(),
+                    "success": "Cambios realizados exitosamente"
+                }
+
+                return jsonify(data), 200
+
 @app.route("/api/admincoffee/users/", methods=['GET', 'POST'])
 @app.route("/api/admincoffee/users/<int:id>", methods=['GET', 'PUT', 'DELETE'])
 def users(id=None):
-    if request.method == 'GET':
+    if request.method == 'GET': 
         if id is not None:
             user = User.query.get(id)
             if user:
@@ -123,6 +173,7 @@ def users(id=None):
             users = User.query.all()
             users = list(map(lambda user: user.serialize(), users))
             return jsonify(users), 200
+
     if request.method == 'POST':
         sorting = request.json.get("sorting", None)
         role = request.json.get("role", None)
@@ -143,31 +194,15 @@ def users(id=None):
             else:
                 users = User.query.order_by(User.name.asc()).all()
                 users = list(map(lambda user: user.serialize(), users))
-                return jsonify(users), 200
-    if request.method == 'PUT':
-        if not id:
-            return jsonify({"msg": "user not found"}), 404
-        else:
-            name = request.json.get("name", None)
-            last_name = request.json.get("last_name", None)
-            password = request.json.get("password", None)
-            email = request.json.get("email", None)
-            phone = request.json.get("phone", None)
-            address = request.json.get("address", None)
-            role = request.json.get("role", None)
-            if not name and not last_name and not email and not phone and not address and not role:
-                return ({"msg": "Some fields are missing!"})
-            else:
-                user = User.query.get(id)
-                user.name = name
-                user.last_name = last_name
-                user.password = password
-                user.email = email
-                user.phone = phone
-                user.address = address
-                user.role = role
-                user.update()
-                return jsonify(user.serialize()), 200
+                return jsonify(users), 200    
+
+    if request.method == 'DELETE':
+        user = User.query.get(id)
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
+        else:            
+            user.delete()
+            return jsonify({"msg": "User succesfully deleted"}), 200            
 
 @app.route("/api/profile")
 @jwt_required
@@ -347,10 +382,7 @@ def products(id=None):
 
 @app.route("/api/admincoffee/products/", methods=['GET', 'POST'])
 @app.route("/api/admincoffee/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-@jwt_required
-def adminProducts(id=None):
-    if not isAdmin():
-        return jsonify({"msg": "User is not allowed to access"}), 403
+def adminProducts(id=None):   
 
     if request.method == 'GET':
         if id is not None:
@@ -448,10 +480,21 @@ def adminProducts(id=None):
             image= request.form.get("image", None)
             categories= request.form.get("categories", None)
             
-            if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-                return jsonify({"msg": "some fields are missing"}), 400
+        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
+            return jsonify({"msg": "some fields are missing"}), 400
         
-            image = request.files['image']                                  
+        if 'image' not in request.files: 
+            pass        
+
+        else:
+            image = request.files['image']
+            images = Product.query.filter(Product.image.in_(image.filename)).first()            
+
+            if image.filename == '':
+                return jsonify({"msg": {"images": "The product image is missing"}}), 400
+
+            elif images:
+                return jsonify({"msg": {"filename": "The product image is missing"}}), 400           
 
             if image and allowed_file(image.filename, ALLOWED_EXTENSIONS):
                 filename = secure_filename(image.filename)
@@ -544,48 +587,7 @@ def content(id=None):
         product.delete()
         return jsonify({"msg": "Content succesfully deleted"}), 200
 
-@app.route("/api/admincoffee/test/", methods=['GET', 'POST'])
-def addProduct2(id=None):
-    if request.method == 'POST':
-        sku= request.json.get("sku", None)
-        brand= request.json.get("brand", None)
-        name= request.json.get("name", None)
-        presentation= request.json.get("presentation", None)
-        price= request.json.get("price", None)
-        stock= request.json.get("stock", None)
-        origin= request.json.get("origin", None)
-        species= request.json.get("species", None)
-        ground= request.json.get("ground", None)
-        acidity= request.json.get("acidity", None)
-        roasting= request.json.get("roasting", None)
-        description= request.json.get("description", None)
-        image= request.json.get("image", None)
-        categories= request.json.get("categories", None)
 
-        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-            return jsonify({"msg": "some fields are missing"}), 400
-        else:
-            product= Product()
-            product.sku= sku
-            product.brand= brand
-            product.name= name
-            product.price= price
-            product.stock= stock
-            product.origin= origin
-            product.species= species
-            product.ground= ground
-            product.acidity= acidity
-            product.roasting= roasting
-            product.presentation= presentation
-            product.description= description
-            product.image= image
-            # this one make the realtionship between Product and Category models based on given category id, you MUST create a category before creating a product
-            for category in categories:
-                p_cat= Category.query.get(category)
-                p_cat.category_id= category
-                product.categories.append(p_cat)
-            product.save()
-            return jsonify(product.serialize_w_categories()), 201
 
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
