@@ -269,7 +269,7 @@ def products(id=None):
         origin= request.json.get("origin", None)
         species= request.json.get("species", None)
         ground= request.json.get("ground", None)
-        acidity= request.json.get("acidity", None)
+        acidity= request.json.get("acidity", None) 
         roasting= request.json.get("roasting", None)
         description= request.json.get("description", None)
         image= request.json.get("image", None)
@@ -367,8 +367,8 @@ def adminProducts(id=None):
 
     if request.method == 'POST':        
         # the parameter below are for registering a new product
-        sku= request.form.get("sku", None)
-        brand= request.form.get("brand", None)
+        sku= request.form.get("sku", None) 
+        brand= request.form.get("brand", None) 
         name= request.form.get("name", None)
         presentation= request.form.get("presentation", None)
         price= request.form.get("price", None)
@@ -376,10 +376,10 @@ def adminProducts(id=None):
         origin= request.form.get("origin", None)
         species= request.form.get("species", None)
         ground= request.form.get("ground", None)
-        acidity= request.form.get("acidity", None)
-        roasting= request.form.get("roasting", None)
-        description= request.form.get("description", None)
-        image= request.form.get("image", None)
+        acidity= request.form.get("acidity", None)   
+        roasting= request.form.get("roasting", None)    
+        description= request.form.get("description", None) 
+        image= request.form.get("image", None) 
         categories= request.form.get("categories", None)       
                     
         # here on is all to validate data on new products          
