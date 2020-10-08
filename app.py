@@ -1,7 +1,8 @@
 import json
-import os
+import mercadopago
+import os, sys
 import datetime
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, redirect
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
@@ -27,10 +28,15 @@ CORS(app)
 
 ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg')
 
-
 @app.route("/")
 def main():
     return render_template('index.html')
+
+@app.route('/api/buy/<int:id>')
+def buy_product(id):
+    product = Product.query.get(id)
+    return redirect(payment(request, product = product))
+
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -414,9 +420,43 @@ def adminProducts(id=None):
         image= request.form.get("image", None) 
         categories= request.form.get("categories", None)       
                     
-        # here on is all to validate data on new products          
-        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-            return jsonify({"msg": "some fields are missing"}), 400  
+        # here on is all to validate data on new products     
+
+        if not sku or sku == "":
+            return jsonify({"msg": {"sku": "El campo SKU es requerido."}}), 400
+        
+        if not price or price == "":
+            return jsonify({"msg": {"price": "El valor del producto es requerido."}}), 400
+        
+        if not brand or brand == "":
+            return jsonify({"msg": {"brand": "La marca del producto es requerida."}}), 400
+
+        if not name or name == "":
+            return jsonify({"msg": {"name": "El nombre del producto es requerido."}}), 400
+
+        if not presentation or presentation == "":
+            return jsonify({"msg": {"presentation": "El campo 'Presentación del producto' es requerido."}}), 400
+
+        if not stock or stock == "":
+            return jsonify({"msg": {"stock": "El stock del producto es requerido."}}), 400
+
+        if not origin or origin == "":
+            return jsonify({"msg": {"brand": "El origen del producto es requerido."}}), 400
+
+        if not species or species == "":
+            return jsonify({"msg": {"species": "La especie del producto es requerida."}}), 400
+
+        if not ground or ground == "":
+            return jsonify({"msg": {"ground": "El tipo de producto es requerido."}}), 400
+
+        if not acidity or acidity == "":
+            return jsonify({"msg": {"acidity": "La acidez del producto es requerida."}}), 400
+        
+        if not roasting or roasting == "":
+            return jsonify({"msg": {"roasting": "El tostado del producto es requerido."}}), 400
+
+        if not description or description == "":
+            return jsonify({"msg": {"description": "La descripción del producto es requerida."}}), 400         
 
         product = Product.query.filter_by(sku=sku).first()
         if product:
@@ -480,11 +520,44 @@ def adminProducts(id=None):
             image= request.form.get("image", None)
             categories= request.form.get("categories", None)
             
-        if not sku and not price and not brand and not name and not presentation and not price and not stock and not origin and not species and not ground and not acidity and not roasting and not description:
-            return jsonify({"msg": "some fields are missing"}), 400
+        if not sku or sku == "":
+            return jsonify({"msg": {"sku": "El campo SKU es requerido."}}), 400
+        
+        if not price or price == "":
+            return jsonify({"msg": {"price": "El valor del producto es requerido."}}), 400
+        
+        if not brand or brand == "":
+            return jsonify({"msg": {"brand": "La marca del producto es requerida."}}), 400
+
+        if not name or name == "":
+            return jsonify({"msg": {"name": "El nombre del producto es requerido."}}), 400
+
+        if not presentation or presentation == "":
+            return jsonify({"msg": {"presentation": "El campo 'Presentación del producto' es requerido."}}), 400
+
+        if not stock or stock == "":
+            return jsonify({"msg": {"stock": "El stock del producto es requerido."}}), 400
+
+        if not origin or origin == "":
+            return jsonify({"msg": {"brand": "El origen del producto es requerido."}}), 400
+
+        if not species or species == "":
+            return jsonify({"msg": {"species": "La especie del producto es requerida."}}), 400
+
+        if not ground or ground == "":
+            return jsonify({"msg": {"ground": "El tipo de producto es requerido."}}), 400
+
+        if not acidity or acidity == "":
+            return jsonify({"msg": {"acidity": "La acidez del producto es requerida."}}), 400
+        
+        if not roasting or roasting == "":
+            return jsonify({"msg": {"roasting": "El tostado del producto es requerido."}}), 400
+
+        if not description or description == "":
+            return jsonify({"msg": {"description": "La descripción del producto es requerida."}}), 400
         
         if 'image' not in request.files: 
-            pass        
+            return jsonify({"msg": {"image": "The product image is missing"}}), 400        
 
         else:
             image = request.files['image']
