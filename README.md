@@ -2,7 +2,7 @@ This project is a work is progress, please visit DEVELOPMENT branch to see curre
 
 ### Created with Python & Flask
 
-* The Front side of this project is located on:
+* The Front side of this project is located at:
 https://github.com/ierrandonea/proyecto-final-4geeks-front/
 
 Packages used in this project:

@@ -383,8 +383,7 @@ def products(id=None):
             elif sorting == 'branddown':
                 products = Product.query.filter(Product.price.between(pricefilterMin, pricefilterMax)).order_by(Product.brand.desc()).all()
                 products = list(map(lambda product: product.serialize_w_categories(), products))
-                return jsonify(products), 200            
-        # here on is all to validate data on new products          
+                return jsonify(products), 200                  
 
 @app.route("/api/admincoffee/products/", methods=['GET', 'POST'])
 @app.route("/api/admincoffee/products/<int:id>", methods=['GET', 'PUT', 'DELETE'])
@@ -423,7 +422,7 @@ def adminProducts(id=None):
         # here on is all to validate data on new products     
 
         if not sku or sku == "":
-            return jsonify({"msg": {"sku": "El campo SKU es requerido."}}), 400
+            return jsonify({"msg": {"sku": "El código SKU es requerido."}}), 400
         
         if not price or price == "":
             return jsonify({"msg": {"price": "El valor del producto es requerido."}}), 400
@@ -521,7 +520,7 @@ def adminProducts(id=None):
             categories= request.form.get("categories", None)
             
         if not sku or sku == "":
-            return jsonify({"msg": {"sku": "El campo SKU es requerido."}}), 400
+            return jsonify({"msg": {"sku": "El código SKU es requerido."}}), 400
         
         if not price or price == "":
             return jsonify({"msg": {"price": "El valor del producto es requerido."}}), 400
@@ -599,10 +598,9 @@ def adminProducts(id=None):
             product.delete()
             return jsonify({"msg": "Product succesfully deleted"}), 200
 
-
-# @app.route("/api/content", methods=['GET', 'POST', 'PUT', 'DELETE'])
-@ app.route("/api/content/", methods=['GET', 'POST'])
-@ app.route("/api/content/<id>", methods=['GET', 'PUT', 'DELETE'])
+# 
+@ app.route("/api/content/", methods=['GET'])
+@ app.route("/api/content/<id>", methods=['GET'])
 def content(id=None):
     if request.method == 'GET':
         if id is not None:
@@ -615,52 +613,37 @@ def content(id=None):
             content= Content.query.all()
             content= list(map(lambda content: content.serialize(), content))
             return jsonify(products), 200
+
+@ app.route("/api/admincoffee/content/", methods=['POST'])
+@ app.route("/api/admincoffee/content/<id>", methods=['PUT'])
+def adminContent():
     if request.method == 'POST':
-        name=request.json.get("name", None)
-        cover=request.json.get("cover", None)
-        images=request.json.get("images", None)
-        resume=request.json.get("resume", None)
-        body=request.json.get("body", None)
-        if not name and cover and images and resume and body:
-            return jsonify({"msg": "some contents are missing"}), 400
-        else:
-            content=Content()
-            content.name=name
-            content.cover=cover
-            content.images=images
-            content.resume=resume
-            content.body=body
-            content.save()
-            return jsonify(content.serialize()), 201
-    if request.method == 'PUT':
-        content=Content.query.get(id)
-        if not content:
-            return jsonify({"msg": "content not found"}), 404
-        else:
-            name=request.json.get("name", None)
-            cover=request.json.get("cover", None)
-            images=request.json.get("images", None)
-            resume=request.json.get("resume", None)
-            body=request.json.get("body", None)
-        if not name and cover and images and resume and body:
-            return jsonify({"msg": "some contents are missing"}), 400
-        else:
-            content=Content()
-            content.name=name
-            content.cover=cover
-            content.images=images
-            content.resume=resume
-            content.body=body
-            content.update()
-            return jsonify(content.serialize()), 200
-    if request.method == 'DELETE':
-        content=Content.query.get(id)
-        if not content:
-            return jsonify({"msg": "Content not found"}), 404
-        product.delete()
-        return jsonify({"msg": "Content succesfully deleted"}), 200
+        name = request.form.get("name", None)
+        cover = request.form.get("cover",None)
+        images = request.form.get("images",None)
+        resume = request.form.get("resume",None)
+        body = request.form.get("body",None)
 
+        # validate fields
+        if not name or name == "":
+            return jsonify({"msg": {"name": "El nombre es requerido."}}), 400
+        if not cover or cover == "":
+            return jsonify({"msg": {"cover": "Una imagen de portada es requerida."}}), 400
+        if not images or images == "":
+            return jsonify({"msg": {"images": "Por favor agregue imagenes."}}), 400
+        if not resume or resume == "":
+            return jsonify({"msg": {"resume": "Incluya una descripción del contenido."}}), 400
+        if not body or body == "":
+            return jsonify({"msg": {"body": "El post debe incluir un cuerpo de texto."}}), 400
 
+        content = Content()
+        content.name = name
+        content.cover = cover
+        content.images = images
+        content.resume = resume
+        content.body = body
+        content.save()
+        return jsonify(content.serialize()), 200
 
 # @app.route("/api/events", methods=['GET', 'POST', 'PUT', 'DELETE'])
 if __name__ == "__main__":
