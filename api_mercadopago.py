@@ -3,8 +3,7 @@ import mercadopago
 import json
 
 def payment(req, **kwargs):
-    product = kwargs["product"]
-    print(price)
+    product = kwargs["product"]    
     preference = {
       "items": [
         {

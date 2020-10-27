@@ -2,6 +2,7 @@ import json
 import mercadopago
 import os, sys
 import datetime
+import requests
 from flask import Flask, request, jsonify, render_template, send_from_directory, redirect
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
@@ -28,15 +29,35 @@ CORS(app)
 
 ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg')
 
+
 @app.route("/")
 def main():
     return render_template('index.html')
 
-@app.route('/api/buy/<int:id>')
-def buy_product(id):
-    product = Product.query.get(id)
-    return redirect(payment(request, product = product))
+@app.route('/api/buy/', methods=['POST'])
+def buy_product():
 
+    price = request.json.get("price", None)    
+    print(price)
+
+    mp = mercadopago.MP("TEST-7211265184697033-092819-f0b63b9f417525939baab82275bb2d4e-652326753")
+
+    preference = {
+        "items": [
+            {
+            "title": "Coffee Test",
+            "quantity": 1,
+            "currency_id": "CLP",
+            "unit_price": price
+            }
+        ]
+    }    
+
+    preferenceResult = mp.preference.create(preference)
+
+    url = preferenceResult["response"]["init_point"]
+
+    return jsonify(url), 200
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -60,6 +81,7 @@ def login():
     expire_in = datetime.timedelta(days=3)
     data = {
         "access_token": create_access_token(identity=user.id, expires_delta=expire_in),
+        "success": "Login exitoso",
         "user": user.serialize()
     }
 
@@ -114,6 +136,7 @@ def register():
     expire_in = datetime.timedelta(days=3)
     data = {
         "access_token": create_access_token(identity=user.id, expires_delta=expire_in),
+        "success": "Usuario registrado exitosamente",
         "user": user.serialize()
     }
 
@@ -205,7 +228,7 @@ def users(id=None):
     if request.method == 'DELETE':
         user = User.query.get(id)
         if not user:
-            return jsonify({"msg": "User not found"}), 404
+            return jsonify({"error": "User not found"}), 404
         else:            
             user.delete()
             return jsonify({"msg": "User succesfully deleted"}), 200            
@@ -460,7 +483,7 @@ def adminProducts(id=None):
 
         product = Product.query.filter_by(sku=sku).first()
         if product:
-            return jsonify({"msg": "The product already exists in the database"}), 400 
+            return jsonify({"msg": {"exists": "El producto ya existe en la base de datos"}}), 400 
 
         if 'image' not in request.files: 
             return jsonify({"msg": {"image": "The product image is missing"}}), 400        
@@ -499,6 +522,7 @@ def adminProducts(id=None):
             p_cat.category_id= category
             product.categories.append(p_cat)
         product.save()
+
         return jsonify(product.serialize_w_categories()), 201 
 
     if request.method == 'PUT':
@@ -516,8 +540,7 @@ def adminProducts(id=None):
             ground= request.form.get("ground", None)
             acidity= request.form.get("acidity", None)
             roasting= request.form.get("roasting", None)
-            description= request.form.get("description", None)
-            image= request.form.get("image", None)
+            description= request.form.get("description", None)            
             categories= request.form.get("categories", None)
             
         if not sku or sku == "":
@@ -556,40 +579,44 @@ def adminProducts(id=None):
         if not description or description == "":
             return jsonify({"msg": {"description": "La descripción del producto es requerida."}}), 400
         
-        if 'image' not in request.files: 
-            return jsonify({"msg": {"image": "The product image is missing"}}), 400        
+        filename = None
 
-        else:
+        if 'image' in request.files:
+        
             image = request.files['image']
-            images = Product.query.filter(Product.image.in_(image.filename)).first()            
 
-            if image.filename == '':
-                return jsonify({"msg": {"images": "The product image is missing"}}), 400
+            if image: 
+                
+                images = Product.query.filter(Product.image.in_(image.filename)).first()            
 
-            elif images:
-                return jsonify({"msg": {"filename": "The product image is missing"}}), 400           
+                if image.filename == '':
+                    return jsonify({"msg": {"images": "The product image is missing"}}), 400
 
-            if image and allowed_file(image.filename, ALLOWED_EXTENSIONS):
-                filename = secure_filename(image.filename)
-                image.save(os.path.join(app.config['UPLOAD_FOLDER'] + '/products/coffee', filename))
+                elif images:
+                    return jsonify({"msg": {"filename": "The product image is missing"}}), 400           
+
+                if image and allowed_file(image.filename, ALLOWED_EXTENSIONS):
+                    filename = secure_filename(image.filename)
+                    image.save(os.path.join(app.config['UPLOAD_FOLDER'] + '/products/coffee', filename))
             
-            product= Product.query.get(id)
-            product.sku= sku
-            product.brand= brand
-            product.name= name
-            product.price= price
-            product.stock= stock
-            product.origin= origin
-            product.species= species
-            product.ground= ground
-            product.acidity= acidity
-            product.roasting= roasting
-            product.presentation= presentation
-            product.description= description
-            if image:
-                product.image= filename
-            product.update()
-            return jsonify(product.serialize()), 200
+        product= Product.query.get(id)
+        product.sku= sku
+        product.brand= brand
+        product.name= name
+        product.price= price
+        product.stock= stock
+        product.origin= origin
+        product.species= species
+        product.ground= ground
+        product.acidity= acidity
+        product.roasting= roasting
+        product.presentation= presentation
+        product.description= description
+        if filename is not None:
+            product.image= filename
+        product.update()
+        
+        return jsonify(product.serialize()), 200
 
     if request.method == 'DELETE':
         product = Product.query.get(id)
@@ -659,6 +686,17 @@ def content(id=None):
             return jsonify({"msg": "Content not found"}), 404
         product.delete()
         return jsonify({"msg": "Content succesfully deleted"}), 200
+
+@app.route("/api/mailto/", methods=['POST'])
+def send_complex_message():
+    return requests.post(
+        "https://api.mailgun.net/v3/sandbox4a459b847c774377b0cd024f167bd8a2.mailgun.org/messages",
+        auth=("api", "0f708ac5fa818e37ab029db938a82098-0d2e38f7-c4b83900"),
+        data={"from": "Excited User <DigitalStore@sandbox4a459b847c774377b0cd024f167bd8a2.mailgun.org>",
+              "to": ["lorenzojcastillom@gmail.com", "castlexl@gmail.com"],
+              "subject": "Hola",
+              "text": "Haciendo algunas pruebas, TE AMO"})
+
 
 
 
